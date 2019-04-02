@@ -82,19 +82,25 @@ if __name__ == '__main__':
     print('read synapses!')
     print('arranging synapses...')
     seg_ids = np.union1d(synapses.presyn_segid.unique(), synapses.postsyn_segid.unique())
-    pre_format = '{{"Type":"pre","Location":[{},{},{}],"ConnectsTo":[[{},{},{}]]}}'
-    post_format = '{{"Type":"post","Location":[{},{},{}]}}'
-    bodies = list()
+    pre_format = '{{"Type":"pre","Confidence":1.0,"Location":[{},{},{}],"ConnectsTo":[[{},{},{}]]}}'
+    post_format = '{{"Type":"post","Confidence":1.0,"Location":[{},{},{}]}}'
+    synapse_handle = open('{}/synapses/synapses.json'.format(neuprint_dir), 'w')
+    synapse_handle.write('[') # bodies = list()
     for seg_ix, seg_id in enumerate(seg_ids):
+        if seg_ix > 0:
+            synapse_handle.write(',')
         if (seg_ix % 1e4 == 0):
             print('arranged {}/{} bodies!'.format(seg_ix, seg_ids.shape[0]))
-        body = dict()
-        body["BodyId"] = seg_id
-        body["SynapseSet"] = list()
+        synapse_handle.write('{') # body = dict()
+        synapse_handle.write('"BodyId:":{}'.format(seg_id)) # body["BodyId"] = seg_id
+        synapse_handle.write(',')
+        synapse_handle.write('"SynapseSet":[') # body["SynapseSet"] = list()
         is_pre = synapses.presyn_segid == seg_id
         is_post = synapses.postsyn_segid == seg_id
         subsyn = synapses[is_pre | is_post]
         for r_ix, row in subsyn.iterrows():
+            if r_ix > 0:
+                synapse_handle.write(',')
             if row.presyn_segid == seg_id:
                 presyn = pre_format.format(
                         row.presyn_x,
@@ -103,18 +109,22 @@ if __name__ == '__main__':
                         row.postsyn_x,
                         row.postsyn_y,
                         row.postsyn_z)
-                body["SynapseSet"].append(presyn)
+                synapse_handle.write(presyn) # body["SynapseSet"].append(presyn)
+            if row.presyn_segid == seg_id and row.postsyn_segid == seg_id:
+                synapse_handle.write(',')
             if row.postsyn_segid == seg_id:
                 postsyn = post_format.format(
                         row.postsyn_x,
                         row.postsyn_y,
                         row.postsyn_z)
-                body["SynapseSet"].append(postsyn)
-        bodies.append(body)
+                synapse_handle.write(postsyn) # body["SynapseSet"].append(postsyn)
+        synapse_handle.write(']')
+        synapse_handle.write('}') # bodies.append(body)
+    synapse_handle.write(']')
     print('arranged synapses!')
     print('writing synapses...')
-    synapse_handle = open('{}/synapses/synapses.json'.format(neuprint_dir), 'w')
-    json.dump(bodies, synapse_handle)
+    # synapse_handle = open('{}/synapses/synapses.json'.format(neuprint_dir), 'w')
+    # json.dump(bodies, synapse_handle)
     print('wrote synapses!')
     print('end!')
 
