@@ -1,6 +1,8 @@
 import json
 
 import dask.dataframe as dd
+import numpy as np
+import pandas as pd
 
 dtype_map = {
         ':START_ID(Neuron)': 'int64',
@@ -66,32 +68,53 @@ def transport_synapses(synapses):
 if __name__ == '__main__':
     dotmotif_dir = 'test_tiny'
     neuprint_dir = 'test_neuprint'
+    print('begin!')
+    print('writing neurons...!')
     # transport neurons
     neurons = dd.read_csv('{}/export-neurons-0.csv'.format(dotmotif_dir))
     neurons.rename(columns={'neuronId:ID(Neuron)': 'Id'}).to_json('{}/neurons'.format(neuprint_dir))
+    print('wrote neurons!')
     # transport synapses
-    synapses = dd.read_csv('{}/export-synapses-*.csv'.format(dotmotif_dir), dtype=dtype_map)
-    presyns, postsyns = transport_synapses(synapses)
+    print('reading synapses...')
+    synapses = dd.read_csv(
+            '{}/export-synapses-*.csv'.format(dotmotif_dir),
+            dtype=dtype_map).compute()
+    print('read synapses!')
+    print('arranging synapses...')
+    seg_ids = np.union1d(synapses.presyn_segid.unique(), synapses.postsyn_segid.unique())
+    pre_format = '{{"Type":"pre","Location":[{},{},{}],"ConnectsTo":[[{},{},{}]]}}'
+    post_format = '{{"Type":"post","Location":[{},{},{}]}}'
+    bodies = list()
+    for seg_ix, seg_id in enumerate(seg_ids):
+        if (seg_ix % 1e4 == 0):
+            print('arranged {}/{} bodies!'.format(seg_ix, seg_ids.shape[0]))
+        body = dict()
+        body["BodyId"] = seg_id
+        body["SynapseSet"] = list()
+        is_pre = synapses.presyn_segid == seg_id
+        is_post = synapses.postsyn_segid == seg_id
+        subsyn = synapses[is_pre | is_post]
+        for r_ix, row in subsyn.iterrows():
+            if row.presyn_segid == seg_id:
+                presyn = pre_format.format(
+                        row.presyn_x,
+                        row.presyn_y,
+                        row.presyn_z,
+                        row.postsyn_x,
+                        row.postsyn_y,
+                        row.postsyn_z)
+                body["SynapseSet"].append(presyn)
+            if row.postsyn_segid == seg_id:
+                postsyn = post_format.format(
+                        row.postsyn_x,
+                        row.postsyn_y,
+                        row.postsyn_z)
+                body["SynapseSet"].append(postsyn)
+        bodies.append(body)
+    print('arranged synapses!')
+    print('writing synapses...')
     synapse_handle = open('{}/synapses/synapses.json'.format(neuprint_dir), 'w')
-    synapse_handle.write('[')
-    pre_ids = set(presyns.index.compute())
-    post_ids = set(postsyns.index.compute())
-    neuron_ids = pre_ids | post_ids
-    for n_ix, neuron in enumerate(neuron_ids):
-        if n_ix == 0:
-            synapse_set_json = ''
-        else:
-            synapse_set_json = ','
-        synapse_set_json += '{"BodyId":'
-        synapse_set_json += str(neuron)
-        synapse_set_json += ',"SynapseSet":['
-        if neuron in pre_ids:
-            synapse_set_json += ','.join(dumps(pres) for pres in presyns.loc[neuron].item())
-        if neuron in pre_ids and neuron in post_ids:
-            synapse_set_json += ','
-        if neuron in post_ids:
-            synapse_set_json += ','.join(dumps(posts) for posts in postsyns.loc[neuron].item())
-        synapse_set_json += ']}'
-        synapse_handle.write(synapse_set_json)
-    synapse_handle.write(']')
+    json.dump(bodies, synapse_handle)
+    print('wrote synapses!')
+    print('end!')
 
