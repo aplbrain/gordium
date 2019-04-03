@@ -15,15 +15,15 @@ class Gordium():
         self.fns = [
                 self.number_of_nodes,
                 self.number_of_edges,
-                # self.number_of_orphans,
-                # self.number_of_loops,
-                # self.number_of_lone_pairs,
-                # self.number_of_leaves,
-                # self.number_of_nodes_with_degree_gt_1000,
-                # self.mean_degree,
-                # self.max_degree,
-                # self.strongly_connected_components,
-                # self.weakly_connected_components,
+                self.number_of_orphans,
+                self.number_of_loops,
+                self.number_of_lone_pairs,
+                self.number_of_leaves,
+                self.number_of_nodes_with_degree_over_1000,
+                self.max_degree,
+                self.mean_degree,
+                self.strongly_connected_components,
+                self.weakly_connected_components,
         ]
 
     def process(self) -> DataFrame:
@@ -41,7 +41,7 @@ class Gordium():
         WITH count(n) as metric
         RETURN metric;
         """
-        return self._extract_metric(self.neo4j.run(query))
+        return self._compute_metric(query)
 
     def number_of_edges(self) -> int:
         query:str = """
@@ -49,17 +49,93 @@ class Gordium():
         WITH count(r) as metric
         RETURN metric;
         """
-        return self._extract_metric(self.neo4j.run(query))
+        return self._compute_metric(query)
 
-    def strongly_connected_components(self):
+    def number_of_orphans(self) -> int:
         query:str = """
-        CALL algo.scc('Letter', 'BIGRAM')
+        MATCH (n)
+        WHERE not (n)-[*]-()
+        WITH count(n) as metric
+        RETURN metric;
+        """
+        return self._compute_metric(query)
+
+    def number_of_loops(self) -> int:
+        query:str = """
+        MATCH (n)-[r]->(n)
+        WITH count(n) as metric
+        RETURN metric;
+        """
+        return self._compute_metric(query)
+
+    def number_of_lone_pairs(self) -> int:
+        query:str = """
+        CALL algo.unionFind.stream('Neuron', 'SYN')
+        YIELD nodeId, setId
+        WITH setId, count(nodeId) as order_of_component
+        WHERE order_of_component = 2
+        WITH count(order_of_component) as metric
+        RETURN metric;
+        """
+        return self._compute_metric(query)
+
+    def number_of_leaves(self) -> int:
+        query:str = """
+        MATCH (n)-[r]-()
+        WITH n, count(r) as degree
+        WHERE degree = 1
+        WITH count(n) as metric
+        RETURN metric;
+        """
+        return self._compute_metric(query)
+
+    def number_of_nodes_with_degree_over_1000(self) -> int:
+        query:str = """
+        MATCH (n)-[r]-()
+        WITH n, count(r) as degree
+        WHERE degree > 1000
+        WITH count(n) as metric
+        RETURN metric;
+        """
+        return self._compute_metric(query)
+
+    def max_degree(self) -> int:
+        query:str = """
+        MATCH (n)-[r]-()
+        WITH n, count(r) as degree
+        WITH max(degree) as metric
+        RETURN metric;
+        """
+        return self._compute_metric(query)
+
+    def mean_degree(self) -> float:
+        query:str = """
+        MATCH (n)-[r]-()
+        WITH n, count(r) as degree
+        WITH avg(degree) as metric
+        RETURN metric;
+        """
+        return self._compute_metric(query)
+
+    def max_strongly_connected_components_order(self):
+        query:str = """
+        CALL algo.scc('Neuron', 'SYN')
         YIELD maxSetSize
         WITH maxSetSize AS metric
         RETURN metric;
         """
-        return self._extract_metric(self.neo4j.run(query))
+        return self._compute_metric(query)
 
-    def _extract_metric(self, cursor):
-        return cursor.to_data_frame().metric[0]
+    def max_weakly_connected_components_order(self) -> :
+        query:str = """
+        CALL algo.unionFind.stream('Neuron', 'SYN')
+        YIELD nodeId, setId
+        WITH setId, count(nodeId) as order_of_component
+        WITH max(order_of_component) as metric
+        RETURN metric;
+        """
+        return self._compute_metric(query)
+
+    def _compute_metric(self, query):
+        return self.neo4j.run(query).to_data_frame().metric[0]
 
