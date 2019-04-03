@@ -2,8 +2,10 @@
 A tool for untangling the mysteries of large-scale graphs.
 
 ## Installation
-`pip install -r requirements.txt`
-`pip install -e .`
+```
+pip install -r requirements.txt
+pip install -e .
+```
 
 ## Usage
 ```
