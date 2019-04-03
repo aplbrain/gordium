@@ -29,42 +29,6 @@ dtype_map = {
         'BBOX_ez': 'float64',
         'size': 'float64'}
 
-def _format_presyn(df):
-    synapse_list = list()
-    for r_ix, row in df.iterrows():
-        synapse = dict()
-        pre_location = [
-                row.presyn_x,
-                row.presyn_y,
-                row.presyn_z]
-        post_location = [
-                row.postsyn_x,
-                row.postsyn_y,
-                row.postsyn_z]
-        synapse['Type'] = 'pre'
-        synapse['Location'] = pre_location
-        synapse['ConnectsTo'] = [post_location]
-        synapse_list.append(synapse)
-    return synapse_list
-
-def _format_postsyn(df):
-    synapse_list = list()
-    for r_ix, row in df.iterrows():
-        synapse = dict()
-        post_location = [
-                row.postsyn_x,
-                row.postsyn_y,
-                row.postsyn_z]
-        synapse['Type'] = 'post'
-        synapse['Location'] = post_location
-        synapse_list.append(synapse)
-    return synapse_list
-
-def transport_synapses(synapses):
-    presyns = synapses.groupby(':START_ID(Neuron)').apply(_format_presyn)
-    postsyns = synapses.groupby(':END_ID(Neuron)').apply(_format_postsyn)
-    return (presyns, postsyns)
-
 if __name__ == '__main__':
     dotmotif_dir = 'test_tiny'
     neuprint_dir = 'test_neuprint'
@@ -98,8 +62,9 @@ if __name__ == '__main__':
         is_pre = synapses.presyn_segid == seg_id
         is_post = synapses.postsyn_segid == seg_id
         subsyn = synapses[is_pre | is_post]
-        for r_ix, row in subsyn.iterrows():
-            if r_ix > 0:
+        syn_ix = 0
+        for _, row in subsyn.iterrows():
+            if syn_ix > 0:
                 synapse_handle.write(',')
             if row.presyn_segid == seg_id:
                 presyn = pre_format.format(
@@ -118,6 +83,7 @@ if __name__ == '__main__':
                         row.postsyn_y,
                         row.postsyn_z)
                 synapse_handle.write(postsyn) # body["SynapseSet"].append(postsyn)
+            syn_ix += 1
         synapse_handle.write(']')
         synapse_handle.write('}') # bodies.append(body)
     synapse_handle.write(']')
