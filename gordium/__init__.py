@@ -35,24 +35,39 @@ class Gordium():
         analytics = DataFrame(analytics)
         return analytics
 
-    def number_of_nodes(self) -> int:
-        query:str = """
-        MATCH (n)
+    def number_of_nodes(
+            self,
+            bounding_box:BoundingBox=None) -> int:
+        query:str = ""
+        if bounding_box is not None:
+            query += self._spatial_subset(bounding_box)
+        query += """
+        MATCH (n:{label}Neuron)
         WITH count(n) as metric
         RETURN metric;
         """
         return self._compute_metric(query)
 
-    def number_of_edges(self) -> int:
-        query:str = """
+    def number_of_edges(
+            self,
+            bounding_box:BoundingBox=None) -> int:
+        query:str = ""
+        if bounding_box is not None:
+            query += self._spatial_subset(bounding_box)
+        query += """
         MATCH (n)-[r]->()
         WITH count(r) as metric
         RETURN metric;
         """
         return self._compute_metric(query)
 
-    def number_of_orphans(self) -> int:
-        query:str = """
+    def number_of_orphans(
+            self,
+            bounding_box:BoundingBox=None) -> int:
+        query:str = ""
+        if bounding_box is not None:
+            query += self._spatial_subset(bounding_box)
+        query += """
         MATCH (n)
         WHERE not (n)-[*]-()
         WITH count(n) as metric
@@ -60,8 +75,13 @@ class Gordium():
         """
         return self._compute_metric(query)
 
-    def number_of_loops(self) -> int:
-        query:str = """
+    def number_of_loops(
+            self,
+            bounding_box:BoundingBox=None) -> int:
+        query:str = ""
+        if bounding_box is not None:
+            query += self._spatial_subset(bounding_box)
+        query += """
         MATCH (n)-[r]->(n)
         WITH count(n) as metric
         RETURN metric;
@@ -79,8 +99,13 @@ class Gordium():
         """
         return self._compute_metric(query)
 
-    def number_of_leaves(self) -> int:
-        query:str = """
+    def number_of_leaves(
+            self,
+            bounding_box:BoundingBox=None) -> int:
+        query:str = ""
+        if bounding_box is not None:
+            query += self._spatial_subset(bounding_box)
+        query += """
         MATCH (n)-[r]-()
         WITH n, count(r) as degree
         WHERE degree = 1
@@ -89,8 +114,13 @@ class Gordium():
         """
         return self._compute_metric(query)
 
-    def number_of_nodes_with_degree_over_1000(self) -> int:
-        query:str = """
+    def number_of_nodes_with_degree_over_1000(
+            self,
+            bounding_box:BoundingBox=None) -> int:
+        query:str = ""
+        if bounding_box is not None:
+            query += self._spatial_subset(bounding_box)
+        query += """
         MATCH (n)-[r]-()
         WITH n, count(r) as degree
         WHERE degree > 1000
@@ -99,8 +129,13 @@ class Gordium():
         """
         return self._compute_metric(query)
 
-    def max_degree(self) -> int:
-        query:str = """
+    def max_degree(
+            self,
+            bounding_box:BoundingBox=None) -> int:
+        query:str = ""
+        if bounding_box is not None:
+            query += self._spatial_subset(bounding_box)
+        query += """
         MATCH (n)-[r]-()
         WITH n, count(r) as degree
         WITH max(degree) as metric
@@ -108,8 +143,13 @@ class Gordium():
         """
         return self._compute_metric(query)
 
-    def mean_degree(self) -> float:
-        query:str = """
+    def mean_degree(
+            self,
+            bounding_box:BoundingBox=None) -> float:
+        query:str = ""
+        if bounding_box is not None:
+            query += self._spatial_subset(bounding_box)
+        query += """
         MATCH (n)-[r]-()
         WITH n, count(r) as degree
         WITH avg(degree) as metric
