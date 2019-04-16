@@ -37,6 +37,7 @@ if __name__ == '__main__':
     neurons['neuid:ID'] = union1d(df.presyn_segid.unique(), df.postsyn_segid.unique())
     neurons[':LABEL'] = 'Neuron'
     neurons.to_csv('{}/neurons.csv'.format(export_dir), index=False)
+    neurons = None
 
     # synapses
     print('synapses...')
@@ -47,6 +48,14 @@ if __name__ == '__main__':
     synapses[':LABEL'] = 'Synapse'
     synapses.to_csv('{}/synapses.csv'.format(export_dir), index=False)
 
+    # connection_sets
+    print('connection sets...')
+    connection_sets = DataFrame()
+    connection_sets['csid:ID'] = df.apply(
+            lambda r: '{}:{}'.format(r.presyn_segid, r.postsyn_segid),
+            axis=1)
+    connection_sets[':LABEL'] = 'ConnectionSet'
+
     # _connects_to
     print('connects to...')
     _connects_to = DataFrame()
@@ -55,20 +64,46 @@ if __name__ == '__main__':
     _connects_to[':TYPE'] = 'ConnectsTo'
     _connects_to = _connects_to.drop_duplicates()
     _connects_to.to_csv('{}/_connects_to.csv'.format(export_dir), index=False)
+    _connects_to = None
 
     # _from
     print('from...')
     _from = DataFrame()
-    _from[':START_ID'] = synapses['synid:ID']
+    _from[':START_ID'] = connection_sets['csid:ID']
     _from[':END_ID'] = df.presyn_segid
     _from[':TYPE'] = 'From'
     _from.to_csv('{}/_from.csv'.format(export_dir), index=False)
+    _from = None
 
     # _to
     print('to...')
     _to = DataFrame()
-    _to[':START_ID'] = synapses['synid:ID']
+    _to[':START_ID'] = connection_sets['csid:ID']
     _to[':END_ID'] = df.postsyn_segid
     _to[':TYPE'] = 'To'
     _to.to_csv('{}/_to.csv'.format(export_dir), index=False)
+    _to = None
+
+    # free up df
+    df = None
+
+    # _contains
+    print('contains...')
+    _contains = DataFrame()
+    _contains[':START_ID'] = connection_sets['csid:ID']
+    _contains[':END_ID'] = synapses['synid:ID']
+    _contains[':TYPE'] = 'Contains'
+    _contains = _contains.drop_duplicates()
+    _contains.to_csv('{}/_contains.csv'.format(export_dir), index=False)
+    _contains = None
+
+    # free up synapses
+    synapses = None
+
+    # write connection sets to disk
+    connection_sets = connection_sets.drop_duplicates()
+    connection_sets.to_csv(
+            '{}/connection_sets.csv'.format(export_dir),
+            index=False)
+    connection_sets = None
 
