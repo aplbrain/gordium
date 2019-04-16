@@ -41,6 +41,7 @@ class Gordium():
         query:str = ""
         if bounding_box is not None:
             query += self._spatial_subset(bounding_box)
+            query += " "
         query += """
         MATCH (n:{label}Neuron)
         WITH count(n) as metric
@@ -54,6 +55,7 @@ class Gordium():
         query:str = ""
         if bounding_box is not None:
             query += self._spatial_subset(bounding_box)
+            query += " "
         query += """
         MATCH (n)-[r]->()
         WITH count(r) as metric
@@ -67,6 +69,7 @@ class Gordium():
         query:str = ""
         if bounding_box is not None:
             query += self._spatial_subset(bounding_box)
+            query += " "
         query += """
         MATCH (n)
         WHERE not (n)-[*]-()
@@ -81,6 +84,7 @@ class Gordium():
         query:str = ""
         if bounding_box is not None:
             query += self._spatial_subset(bounding_box)
+            query += " "
         query += """
         MATCH (n)-[r]->(n)
         WITH count(n) as metric
@@ -105,6 +109,7 @@ class Gordium():
         query:str = ""
         if bounding_box is not None:
             query += self._spatial_subset(bounding_box)
+            query += " "
         query += """
         MATCH (n)-[r]-()
         WITH n, count(r) as degree
@@ -120,6 +125,7 @@ class Gordium():
         query:str = ""
         if bounding_box is not None:
             query += self._spatial_subset(bounding_box)
+            query += " "
         query += """
         MATCH (n)-[r]-()
         WITH n, count(r) as degree
@@ -135,6 +141,7 @@ class Gordium():
         query:str = ""
         if bounding_box is not None:
             query += self._spatial_subset(bounding_box)
+            query += " "
         query += """
         MATCH (n)-[r]-()
         WITH n, count(r) as degree
@@ -149,6 +156,7 @@ class Gordium():
         query:str = ""
         if bounding_box is not None:
             query += self._spatial_subset(bounding_box)
+            query += " "
         query += """
         MATCH (n)-[r]-()
         WITH n, count(r) as degree
@@ -175,6 +183,22 @@ class Gordium():
         RETURN metric;
         """
         return self._compute_metric(query)
+
+    def _spatial_subset(self, bounding_box:BoundingBox):
+        query:str = """
+        MATCH (cs:ConnectionSet)-[:Contains]->(s:Synapse)
+        WHERE point({{x:{},y:{},z:{}}}) < s.location < point({{x:{},y:{},z:{}}})
+        WITH DISTINCT cs
+        MATCH (n0:Neuron)<-[:From]-(cs)-[:To]->(n1:Neuron)
+        MATCH DISTINCT (n0)-[:ConnectsTo]->(n1)
+        """.format(
+                x_lower,
+                y_lower,
+                z_lower,
+                x_upper,
+                y_upper,
+                z_upper)
+        return query
 
     def _compute_metric(self, query):
         return self.neo4j.run(query).to_data_frame().metric[0]
