@@ -157,7 +157,7 @@ class Gordium():
         """
         return self._compute_metric(query)
 
-    def max_strongly_connected_components_order(self):
+    def max_strongly_connected_components_order(self) -> int:
         query:str = """
         CALL algo.scc('Neuron', 'SYN')
         YIELD maxSetSize
@@ -166,7 +166,7 @@ class Gordium():
         """
         return self._compute_metric(query)
 
-    def max_weakly_connected_components_order(self) -> :
+    def max_weakly_connected_components_order(self) -> int:
         query:str = """
         CALL algo.unionFind.stream('Neuron', 'SYN')
         YIELD nodeId, setId
