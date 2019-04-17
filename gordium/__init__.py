@@ -210,7 +210,7 @@ class Gordium():
                     relationship_query)
         else:
             query:str = """
-            CALL algo.unionFind.stream("Neuron", "ConnectsTo", {{graph: "huge"}})
+            CALL algo.unionFind.stream("Neuron", "ConnectsTo", {graph: "huge"})
             YIELD nodeId, setId
             WITH setId, COUNT(nodeId) AS order_of_component
             WHERE order_of_component = 1
@@ -237,7 +237,7 @@ class Gordium():
                     relationship_query)
         else:
             query:str = """
-            CALL algo.unionFind.stream("Neuron", "ConnectsTo", {{graph: "huge"}})
+            CALL algo.unionFind.stream("Neuron", "ConnectsTo", {graph: "huge"})
             YIELD nodeId, setId
             WITH setId, COUNT(nodeId) AS order_of_component
             WHERE order_of_component = 2
@@ -262,7 +262,7 @@ class Gordium():
                     relationship_query)
         else:
             query:str = """
-            CALL algo.scc("Neuron", "ConnectsTo", {{graph: "huge"}})
+            CALL algo.scc("Neuron", "ConnectsTo", {graph: "huge"})
             YIELD maxSetSize
             WITH maxSetSize AS metric
             RETURN metric;
@@ -286,7 +286,7 @@ class Gordium():
                     relationship_query)
         else:
             query:str = """
-            CALL algo.unionFind.stream("Neuron", "ConnectsTo", {{graph: "huge"}})
+            CALL algo.unionFind.stream("Neuron", "ConnectsTo", {graph: "huge"})
             YIELD nodeId, setId
             WITH setId, COUNT(nodeId) AS order_of_component
             WITH MAX(order_of_component) AS metric
