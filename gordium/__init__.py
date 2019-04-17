@@ -184,10 +184,10 @@ class Gordium():
         """
         return self._compute_metric(query)
 
-    def _spatial_subset(self, bounding_box:BoundingBox):
+    def _spatial_subset(self, bounding_box:BoundingBox) -> str:
         query:str = """
         MATCH (cs:ConnectionSet)-[:Contains]->(s:Synapse)
-        WHERE point({{x:{},y:{},z:{}}}) < s.location < point({{x:{},y:{},z:{}}})
+        WHERE point({{x:{},y:{},z:{}}}) <= s.location < point({{x:{},y:{},z:{}}})
         WITH DISTINCT cs
         MATCH (n0:Neuron)<-[:From]-(cs)-[:To]->(n1:Neuron)
         MATCH DISTINCT (n0)-[:ConnectsTo]->(n1)

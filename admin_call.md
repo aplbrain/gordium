@@ -7,11 +7,11 @@ docker run --detach --rm -v "$(pwd)/data":/data -v "$(pwd)/plugins":/plugins --e
 CREATE INDEX ON :Synapse(location);
 CALL db.indexes();
 
-MATCH (cs:ConnectionSet)-[:Contains]->(s:Synapse) WHERE point({x:189000,y:227000,z:500}) < s.location < point({x:190000,y:227300,z:570}) WITH DISTINCT cs RETURN cs;
+MATCH (cs:ConnectionSet)-[:Contains]->(s:Synapse) WHERE point({x:189000,y:227000,z:500}) <= s.location < point({x:190000,y:227300,z:570}) WITH DISTINCT cs RETURN cs;
 
-MATCH (cs:ConnectionSet)-[:Contains]->(s:Synapse) WHERE point({x:180000,y:220000,z:500}) < s.location < point({x:190000,y:230000,z:560}) WITH DISTINCT cs MATCH (n0:Neuron)<-[:From]-(cs)-[:To]->(n1:Neuron) RETURN DISTINCT (n0)-[:ConnectsTo]->(n1);
+MATCH (cs:ConnectionSet)-[:Contains]->(s:Synapse) WHERE point({x:180000,y:220000,z:500}) <= s.location < point({x:190000,y:230000,z:560}) WITH DISTINCT cs MATCH (n0:Neuron)<-[:From]-(cs)-[:To]->(n1:Neuron) RETURN DISTINCT (n0)-[:ConnectsTo]->(n1);
 
-MATCH (cs:ConnectionSet)-[:Contains]->(s:Synapse) WHERE point({x:180000,y:220000,z:500}) < s.location < point({x:190000,y:230000,z:560}) WITH DISTINCT cs MATCH (n0:Neuron)<-[:From]-(cs)-[:To]->(n1:Neuron) MATCH (n0)-[c:ConnectsTo]->(n1) RETURN DISTINCT n0, COUNT(DISTINCT c);
+MATCH (cs:ConnectionSet)-[:Contains]->(s:Synapse) WHERE point({x:180000,y:220000,z:500}) <= s.location < point({x:190000,y:230000,z:560}) WITH DISTINCT cs MATCH (n0:Neuron)<-[:From]-(cs)-[:To]->(n1:Neuron) MATCH (n0)-[c:ConnectsTo]->(n1) RETURN DISTINCT n0, COUNT(DISTINCT c);
 
-CALL algo.scc("MATCH (n:Neuron)<-[:From|:To]-(cs:ConnectionSet)-[:Contains]->(s:Synapse) WHERE point({x:189000,y:227000,z:550}) < s.location < point({x:190000,y:227300,z:560}) RETURN id(n) AS id;", "MATCH (cs:ConnectionSet)-[:Contains]->(s:Synapse) WHERE point({x:189000,y:227000,z:550}) < s.location < point({x:190000,y:227300,z:560}) WITH DISTINCT cs MATCH (n0:Neuron)<-[:From]-(cs)-[:To]->(n1:Neuron) RETURN DISTINCT id(n0) AS source, id(n1) AS target", {graph: "cypher"}) YIELD maxSetSize RETURN maxSetSize;
+CALL algo.scc("MATCH (n:Neuron)<-[:From|:To]-(cs:ConnectionSet)-[:Contains]->(s:Synapse) WHERE point({x:189000,y:227000,z:550}) <= s.location < point({x:190000,y:227300,z:560}) RETURN id(n) AS id;", "MATCH (cs:ConnectionSet)-[:Contains]->(s:Synapse) WHERE point({x:189000,y:227000,z:550}) <= s.location < point({x:190000,y:227300,z:560}) WITH DISTINCT cs MATCH (n0:Neuron)<-[:From]-(cs)-[:To]->(n1:Neuron) RETURN DISTINCT id(n0) AS source, id(n1) AS target", {graph: "cypher"}) YIELD maxSetSize RETURN maxSetSize;
 
