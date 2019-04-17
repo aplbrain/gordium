@@ -180,7 +180,7 @@ class Gordium():
             MATCH (n0)-[c:ConnectsTo]->(n1)
             MATCH (n:Neuron)-[c]-()
             WITH n, COUNT(c) AS degree
-            WITH MEAN(degree) AS metric
+            WITH AVG(degree) AS metric
             RETURN metric;
             """
         else:
