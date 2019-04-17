@@ -98,15 +98,31 @@ class Gordium():
         """
         return self._compute_metric(query)
 
-    def number_of_lone_pairs(self) -> int:
-        query:str = """
-        CALL algo.unionFind.stream('Neuron', 'SYN')
-        YIELD nodeId, setId
-        WITH setId, count(nodeId) as order_of_component
-        WHERE order_of_component = 2
-        WITH count(order_of_component) as metric
-        RETURN metric;
-        """
+    def number_of_lone_pairs(
+            self,
+            bounding_box:BoundingBox=None) -> int:
+        if bounding_box is not None:
+            node_query:str = self._spatial_node_query(bounding_box)
+            relationship_query:str = self._spatial_relationship_query(bounding_box)
+            query:str = """
+            CALL algo.unionFind.stream("{}", "{}", {{graph: "cypher"}})
+            YIELD nodeId, setId
+            WITH setId, count(nodeId) as order_of_component
+            WHERE order_of_component = 2
+            WITH count(order_of_component) as metric
+            RETURN metric;
+            """.format(
+                    node_query,
+                    relationship_query)
+        else:
+            query:str = """
+            CALL algo.unionFind.stream("Neuron", "ConnectsTo", {{graph: "huge"}})
+            YIELD nodeId, setId
+            WITH setId, count(nodeId) as order_of_component
+            WHERE order_of_component = 2
+            WITH count(order_of_component) as metric
+            RETURN metric;
+            """
         return self._compute_metric(query)
 
     def number_of_leaves(
@@ -171,23 +187,52 @@ class Gordium():
         """
         return self._compute_metric(query)
 
-    def max_strongly_connected_components_order(self) -> int:
-        query:str = """
-        CALL algo.scc('Neuron', 'SYN')
-        YIELD maxSetSize
-        WITH maxSetSize AS metric
-        RETURN metric;
-        """
+    def max_strongly_connected_components_order(
+            self,
+            bounding_box:BoundingBox=None) -> int:
+        if bounding_box is not None:
+            node_query:str = self._spatial_node_query(bounding_box)
+            relationship_query:str = self._spatial_relationship_query(bounding_box)
+            query:str = """
+            CALL algo.scc("{}", "{}", {{graph: "cypher"}})
+            YIELD maxSetSize
+            WITH maxSetSize AS metric
+            RETURN metric;
+            """.format(
+                    node_query,
+                    relationship_query)
+        else:
+            query:str = """
+            CALL algo.scc("Neuron", "ConnectsTo", {{graph: "huge"}})
+            YIELD maxSetSize
+            WITH maxSetSize AS metric
+            RETURN metric;
+            """
         return self._compute_metric(query)
 
-    def max_weakly_connected_components_order(self) -> int:
-        query:str = """
-        CALL algo.unionFind.stream('Neuron', 'SYN')
-        YIELD nodeId, setId
-        WITH setId, count(nodeId) as order_of_component
-        WITH max(order_of_component) as metric
-        RETURN metric;
-        """
+    def max_weakly_connected_components_order(
+            self,
+            bounding_box:BoundingBox=None) -> int:
+        if bounding_box is not None:
+            node_query:str = self._spatial_node_query(bounding_box)
+            relationship_query:str = self._spatial_relationship_query(bounding_box)
+            query:str = """
+            CALL algo.unionFind.stream("{}", "{}", {{graph: "cypher"}})
+            YIELD nodeId, setId
+            WITH setId, count(nodeId) as order_of_component
+            WITH max(order_of_component) as metric
+            RETURN metric;
+            """.format(
+                    node_query,
+                    relationship_query)
+        else:
+            query:str = """
+            CALL algo.unionFind.stream("Neuron", "ConnectsTo", {{graph: "huge"}})
+            YIELD nodeId, setId
+            WITH setId, count(nodeId) as order_of_component
+            WITH max(order_of_component) as metric
+            RETURN metric;
+            """
         return self._compute_metric(query)
 
     def _spatial_subset(self, bounding_box:BoundingBox) -> str:
