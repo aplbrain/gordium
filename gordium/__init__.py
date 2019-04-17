@@ -192,12 +192,42 @@ class Gordium():
         MATCH (n0:Neuron)<-[:From]-(cs)-[:To]->(n1:Neuron)
         MATCH DISTINCT (n0)-[:ConnectsTo]->(n1)
         """.format(
-                x_lower,
-                y_lower,
-                z_lower,
-                x_upper,
-                y_upper,
-                z_upper)
+                bounding_box.x_lower,
+                bounding_box.y_lower,
+                bounding_box.z_lower,
+                bounding_box.x_upper,
+                bounding_box.y_upper,
+                bounding_box.z_upper)
+        return query
+
+    def _spatial_node_query(self, bounding_box:BoundingBox) -> str:
+        query:str = """
+        MATCH (n:Neuron)<-[:From|:To]-(cs:ConnectionSet)-[:Contains]->(s:Synapse)
+        WHERE point({{x:{},y:{},z:{}}}) <= s.location < point({{x:{},y:{},z:{}}})
+        RETURN id(n) AS id;
+        """.format(
+                bounding_box.x_lower,
+                bounding_box.y_lower,
+                bounding_box.z_lower,
+                bounding_box.x_upper,
+                bounding_box.y_upper,
+                bounding_box.z_upper)
+        return query
+
+    def _spatial_relationship_query(self, bounding_box:BoundingBox) -> str:
+        query:str = """
+        MATCH (cs:ConnectionSet)-[:Contains]->(s:Synapse)
+        WHERE point({{x:{},y:{},z:{}}}) <= s.location < point({{x:{},y:{},z:{}}})
+        WITH DISTINCT cs
+        MATCH (n0:Neuron)<-[:From]-(cs)-[:To]->(n1:Neuron)
+        RETURN DISTINCT id(n0) AS source, id(n1) AS target;
+        """.format(
+                bounding_box.x_lower,
+                bounding_box.y_lower,
+                bounding_box.z_lower,
+                bounding_box.x_upper,
+                bounding_box.y_upper,
+                bounding_box.z_upper)
         return query
 
     def _compute_metric(self, query):
