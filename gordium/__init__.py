@@ -187,7 +187,7 @@ class Gordium():
             query += """
             MATCH (n:Neuron)-[c:ConnectsTo]-()
             WITH n, COUNT(c) AS degree
-            WITH MEAN(degree) AS metric
+            WITH AVG(degree) AS metric
             RETURN metric;
             """
         return self._compute_metric(query)
