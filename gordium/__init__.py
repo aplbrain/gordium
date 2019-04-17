@@ -1,5 +1,11 @@
+from collections import namedtuple
+
 from pandas import DataFrame
 from dotmotif.executors import Neo4jExecutor
+
+BoundingBox = namedtuple(
+        'BoundingBox',
+        'x_lower y_lower z_lower x_upper y_upper z_upper')
 
 class Gordium():
 
@@ -22,8 +28,8 @@ class Gordium():
                 self.number_of_nodes_with_degree_over_1000,
                 self.max_degree,
                 self.mean_degree,
-                self.strongly_connected_components,
-                self.weakly_connected_components,
+                self.max_strongly_connected_components_order,
+                self.max_weakly_connected_components_order,
         ]
 
     def process(self) -> DataFrame:
