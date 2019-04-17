@@ -48,11 +48,18 @@ class Gordium():
         if bounding_box is not None:
             query += self._spatial_subset(bounding_box)
             query += " "
-        query += """
-        MATCH (n:{label}Neuron)
-        WITH count(n) as metric
-        RETURN metric;
-        """
+            query += """
+            WITH COLLECT(n0)+COLLECT(n1) AS n_list
+            UNWIND n_list AS n
+            WITH COUNT(DISTINCT n) AS metric
+            RETURN metric;
+            """
+        else:
+            query += """
+            MATCH (n:Neuron)
+            WITH COUNT(n) AS metric
+            RETURN metric;
+            """
         return self._compute_metric(query)
 
     def number_of_edges(
@@ -236,12 +243,11 @@ class Gordium():
         return self._compute_metric(query)
 
     def _spatial_subset(self, bounding_box:BoundingBox) -> str:
-        query:str = """
+        subset:str = """
         MATCH (cs:ConnectionSet)-[:Contains]->(s:Synapse)
         WHERE point({{x:{},y:{},z:{}}}) <= s.location < point({{x:{},y:{},z:{}}})
         WITH DISTINCT cs
         MATCH (n0:Neuron)<-[:From]-(cs)-[:To]->(n1:Neuron)
-        MATCH DISTINCT (n0)-[:ConnectsTo]->(n1)
         """.format(
                 bounding_box.x_lower,
                 bounding_box.y_lower,
@@ -249,7 +255,7 @@ class Gordium():
                 bounding_box.x_upper,
                 bounding_box.y_upper,
                 bounding_box.z_upper)
-        return query
+        return subset
 
     def _spatial_node_query(self, bounding_box:BoundingBox) -> str:
         query:str = """
