@@ -262,7 +262,7 @@ class Gordium():
                     relationship_query)
         else:
             query:str = """
-            CALL algo.scc("Neuron", "ConnectsTo", {graph: "huge"})
+            CALL algo.scc("Neuron", "ConnectsTo")
             YIELD maxSetSize
             WITH maxSetSize AS metric
             RETURN metric;
