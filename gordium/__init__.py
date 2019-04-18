@@ -72,8 +72,7 @@ class Gordium():
             query += self._spatial_subset(bounding_box)
             query += " "
             query += """
-            MATCH (n0)-[c:ConnectsTo]->(n1)
-            WITH COUNT(DISTINCT c) AS metric
+            WITH COUNT(DISTINCT cs) AS metric
             RETURN metric;
             """
         else:
