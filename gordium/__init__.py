@@ -32,11 +32,13 @@ class Gordium():
                 self.max_weakly_connected_components_order,
         ]
 
-    def process(self) -> DataFrame:
+    def process(
+                self,
+                bounding_box:BoundingBox=None) -> DataFrame:
         analytics = list()
         analytic = dict()
         for fn in self.fns:
-            analytic[fn.__name__] = fn()
+            analytic[fn.__name__] = fn(bounding_box)
         analytics.append(analytic)
         analytics = DataFrame(analytics)
         return analytics
@@ -77,7 +79,7 @@ class Gordium():
         else:
             query += """
             MATCH (n:Neuron)-[c:ConnectsTo]->()
-            WITH COUNT(DISTINCT c) AS metric
+            WITH COUNT(c) AS metric
             RETURN metric;
             """
         return self._compute_metric(query)
@@ -106,7 +108,7 @@ class Gordium():
             query += """
             MATCH (n0)-[c:ConnectsTo]->(n1)
             MATCH (n:Neuron)-[c]-()
-            WITH n, COUNT(c) AS degree
+            WITH n, COUNT(DISTINCT c) AS degree
             WHERE degree = 1
             WITH COUNT(DISTINCT n) AS metric
             RETURN metric;
@@ -131,7 +133,7 @@ class Gordium():
             query += """
             MATCH (n0)-[c:ConnectsTo]->(n1)
             MATCH (n:Neuron)-[c]-()
-            WITH n, COUNT(c) AS degree
+            WITH n, COUNT(DISTINCT c) AS degree
             WHERE degree > 1000
             WITH COUNT(DISTINCT n) AS metric
             RETURN metric;
@@ -156,7 +158,7 @@ class Gordium():
             query += """
             MATCH (n0)-[c:ConnectsTo]->(n1)
             MATCH (n:Neuron)-[c]-()
-            WITH n, COUNT(c) AS degree
+            WITH n, COUNT(DISTINCT c) AS degree
             WITH MAX(degree) AS metric
             RETURN metric;
             """
@@ -179,7 +181,7 @@ class Gordium():
             query += """
             MATCH (n0)-[c:ConnectsTo]->(n1)
             MATCH (n:Neuron)-[c]-()
-            WITH n, COUNT(c) AS degree
+            WITH n, COUNT(DISTINCT c) AS degree
             WITH AVG(degree) AS metric
             RETURN metric;
             """
