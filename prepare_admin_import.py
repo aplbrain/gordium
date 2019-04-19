@@ -1,15 +1,19 @@
-from hashlib import md5
+from multiprocessing import cpu_count
+from sys import argv
+
+import dask.dataframe as dd
+
+from dask.dataframe import read_csv
+# from dask.distributed import Client
 from numpy import union1d
-from pandas import DataFrame, read_csv
+from pandas import DataFrame
 
+def prepare_admin_import(df, export_dir):
+    # client = Client()
 
-if __name__ == '__main__':
-
-    export_dir = 'import'
-    print('reading...')
-    df = read_csv('team_2_phase_1_centroid.csv')
-
+    # export_dir = 'import'
     print('cleaning...')
+    df = df.repartition(npartitions=cpu_count())
     df = df.dropna()
     df = df.drop_duplicates()
 
@@ -19,22 +23,15 @@ if __name__ == '__main__':
             'centroid_x': 'int32',
             'centroid_y': 'int32',
             'centroid_z': 'int32',
-            # 'presyn_x': 'int32',
-            # 'presyn_y': 'int32',
-            # 'presyn_z': 'int32',
-            # 'postsyn_x': 'int32',
-            # 'postsyn_y': 'int32',
-            # 'postsyn_z': 'int32'
             }
     df = df.astype(dtypes)
-    # df['centroid_x'] = (0.5*(df.presyn_x + df.postsyn_x)).astype('int32')
-    # df['centroid_y'] = (0.5*(df.presyn_y + df.postsyn_y)).astype('int32')
-    # df['centroid_z'] = (0.5*(df.presyn_z + df.postsyn_z)).astype('int32')
+    presyn_segid = df.presyn_segid.compute()
+    postsyn_segid = df.postsyn_segid.compute()
 
     # segments
     print('neurons...')
     neurons = DataFrame()
-    neurons['neuid:ID'] = union1d(df.presyn_segid.unique(), df.postsyn_segid.unique())
+    neurons['neuid:ID'] = union1d(presyn_segid.unique(), postsyn_segid.unique())
     neurons[':LABEL'] = 'Neuron'
     neurons.to_csv('{}/neurons.csv'.format(export_dir), index=False)
     neurons = None
@@ -42,7 +39,10 @@ if __name__ == '__main__':
     # synapses
     print('synapses...')
     synapses = DataFrame()
-    synapses['location:point'] = df.apply(lambda r: '{{x:{},y:{},z:{}}}'.format(r.centroid_x, r.centroid_y, r.centroid_z), axis=1)
+    synapses['location:point'] = df.map_partitions(
+            lambda df: df.apply(
+                    lambda r: '{{x:{},y:{},z:{}}}'.format(r.centroid_x, r.centroid_y, r.centroid_z),
+                    axis=1)).compute()
     # synapses['synid:ID'] = synapses['location:point'].map(lambda s: md5(s.encode()).hexdigest())
     synapses['synid:ID'] = synapses['location:point'].str[1:-1]
     synapses[':LABEL'] = 'Synapse'
@@ -51,16 +51,17 @@ if __name__ == '__main__':
     # connection_sets
     print('connection sets...')
     connection_sets = DataFrame()
-    connection_sets['csid:ID'] = df.apply(
-            lambda r: '{}:{}'.format(r.presyn_segid, r.postsyn_segid),
-            axis=1)
+    connection_sets['csid:ID'] = df.map_partitions(
+            lambda df: df.apply(
+                    lambda r: '{}:{}'.format(r.presyn_segid, r.postsyn_segid),
+                    axis=1)).compute()
     connection_sets[':LABEL'] = 'ConnectionSet'
 
     # _connects_to
     print('connects to...')
     _connects_to = DataFrame()
-    _connects_to[':START_ID'] = df.presyn_segid
-    _connects_to[':END_ID'] = df.postsyn_segid
+    _connects_to[':START_ID'] = presyn_segid
+    _connects_to[':END_ID'] = postsyn_segid
     _connects_to[':TYPE'] = 'ConnectsTo'
     _connects_to = _connects_to.drop_duplicates()
     _connects_to.to_csv('{}/_connects_to.csv'.format(export_dir), index=False)
@@ -70,7 +71,7 @@ if __name__ == '__main__':
     print('from...')
     _from = DataFrame()
     _from[':START_ID'] = connection_sets['csid:ID']
-    _from[':END_ID'] = df.presyn_segid
+    _from[':END_ID'] = presyn_segid
     _from[':TYPE'] = 'From'
     _from.to_csv('{}/_from.csv'.format(export_dir), index=False)
     _from = None
@@ -79,7 +80,7 @@ if __name__ == '__main__':
     print('to...')
     _to = DataFrame()
     _to[':START_ID'] = connection_sets['csid:ID']
-    _to[':END_ID'] = df.postsyn_segid
+    _to[':END_ID'] = postsyn_segid
     _to[':TYPE'] = 'To'
     _to.to_csv('{}/_to.csv'.format(export_dir), index=False)
     _to = None
@@ -106,4 +107,14 @@ if __name__ == '__main__':
             '{}/connection_sets.csv'.format(export_dir),
             index=False)
     connection_sets = None
+
+    # client.close()
+    return
+
+if __name__ == '__main__':
+    edges_file = argv[1]
+    export_dir = argv[2]
+    print('reading...')
+    edgeframe = read_csv(edges_file)
+    prepare_admin_import(edgeframe, export_dir)
 

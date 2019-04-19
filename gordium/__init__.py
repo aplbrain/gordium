@@ -21,7 +21,7 @@ class Gordium():
         self.fns = [
                 self.number_of_nodes,
                 self.number_of_edges,
-                self.number_of_loops,
+                # self.number_of_loops,
                 self.number_of_leaves,
                 self.number_of_nodes_with_degree_over_1000,
                 self.max_degree,
