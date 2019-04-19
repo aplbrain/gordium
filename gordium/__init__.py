@@ -95,7 +95,7 @@ class Gordium():
         else:
             query += """
             """
-        return self._compute_metric(query)
+        return 0 # self._compute_metric(query)
 
     def number_of_leaves(
             self,
@@ -105,9 +105,8 @@ class Gordium():
             query += self._spatial_subset(bounding_box)
             query += " "
             query += """
-            MATCH (n0)-[c:ConnectsTo]->(n1)
-            MATCH (n:Neuron)-[c]-()
-            WITH n, COUNT(DISTINCT c) AS degree
+            MATCH (n:Neuron)-[:From|:To]-(cs)
+            WITH n, COUNT(DISTINCT cs) AS degree
             WHERE degree = 1
             WITH COUNT(DISTINCT n) AS metric
             RETURN metric;
@@ -130,9 +129,8 @@ class Gordium():
             query += self._spatial_subset(bounding_box)
             query += " "
             query += """
-            MATCH (n0)-[c:ConnectsTo]->(n1)
-            MATCH (n:Neuron)-[c]-()
-            WITH n, COUNT(DISTINCT c) AS degree
+            MATCH (n:Neuron)-[:From|:To]-(cs)
+            WITH n, COUNT(DISTINCT cs) AS degree
             WHERE degree > 1000
             WITH COUNT(DISTINCT n) AS metric
             RETURN metric;
@@ -155,9 +153,8 @@ class Gordium():
             query += self._spatial_subset(bounding_box)
             query += " "
             query += """
-            MATCH (n0)-[c:ConnectsTo]->(n1)
-            MATCH (n:Neuron)-[c]-()
-            WITH n, COUNT(DISTINCT c) AS degree
+            MATCH (n:Neuron)-[:From|:To]-(cs)
+            WITH n, COUNT(DISTINCT cs) AS degree
             WITH MAX(degree) AS metric
             RETURN metric;
             """
@@ -178,9 +175,8 @@ class Gordium():
             query += self._spatial_subset(bounding_box)
             query += " "
             query += """
-            MATCH (n0)-[c:ConnectsTo]->(n1)
-            MATCH (n:Neuron)-[c]-()
-            WITH n, COUNT(DISTINCT c) AS degree
+            MATCH (n:Neuron)-[:From|:To]-(cs)
+            WITH n, COUNT(DISTINCT cs) AS degree
             WITH AVG(degree) AS metric
             RETURN metric;
             """
@@ -314,7 +310,7 @@ class Gordium():
         query:str = """
         MATCH (n:Neuron)<-[:From|:To]-(cs:ConnectionSet)-[:Contains]->(s:Synapse)
         WHERE point({{x:{},y:{},z:{}}}) <= s.location < point({{x:{},y:{},z:{}}})
-        RETURN id(n) AS id;
+        RETURN DISTINCT ID(n) AS id;
         """.format(
                 bounding_box.x_lower,
                 bounding_box.y_lower,
@@ -330,7 +326,7 @@ class Gordium():
         WHERE point({{x:{},y:{},z:{}}}) <= s.location < point({{x:{},y:{},z:{}}})
         WITH DISTINCT cs
         MATCH (n0:Neuron)<-[:From]-(cs)-[:To]->(n1:Neuron)
-        RETURN DISTINCT id(n0) AS source, id(n1) AS target;
+        RETURN DISTINCT ID(n0) AS source, ID(n1) AS target;
         """.format(
                 bounding_box.x_lower,
                 bounding_box.y_lower,
