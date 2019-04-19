@@ -28,8 +28,8 @@ class Gordium():
                 self.mean_degree,
                 self.number_of_orphans,
                 self.number_of_lone_pairs,
-                self.max_strongly_connected_components_order,
-                self.max_weakly_connected_components_order,
+                self.max_strongly_connected_component_order,
+                self.max_weakly_connected_component_order,
         ]
 
     def process(
