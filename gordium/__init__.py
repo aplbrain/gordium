@@ -91,11 +91,18 @@ class Gordium():
             query += self._spatial_subset(bounding_box)
             query += " "
             query += """
+            WHERE n0 = n1
+            WITH COUNT(DISTINCT n0) AS metric
+            RETURN metric;
             """
         else:
             query += """
+            MATCH (n0:Neuron)-[:ConnectsTo]->(n1:Neuron)
+            WHERE n0 = n1
+            WITH COUNT(DISTINCT n0) AS metric
+            RETURN metric;
             """
-        return 0 # self._compute_metric(query)
+        return self._compute_metric(query)
 
     def number_of_leaves(
             self,
