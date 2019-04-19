@@ -250,7 +250,7 @@ class Gordium():
             """
         return self._compute_metric(query)    
 
-    def max_strongly_connected_components_order(
+    def max_strongly_connected_component_order(
             self,
             bounding_box:BoundingBox=None) -> int:
         if bounding_box is not None:
@@ -273,7 +273,7 @@ class Gordium():
             """
         return self._compute_metric(query)
 
-    def max_weakly_connected_components_order(
+    def max_weakly_connected_component_order(
             self,
             bounding_box:BoundingBox=None) -> int:
         if bounding_box is not None:
