@@ -4,12 +4,13 @@ from sys import argv
 import dask.dataframe as dd
 
 from dask.dataframe import read_csv
-# from dask.distributed import Client
 from numpy import union1d
 from pandas import DataFrame
 
+from numpy.random import seed
+seed(0)
+
 def prepare_admin_import(df, export_dir):
-    # client = Client()
 
     # export_dir = 'import'
     print('cleaning...')
@@ -108,7 +109,6 @@ def prepare_admin_import(df, export_dir):
             index=False)
     connection_sets = None
 
-    # client.close()
     return
 
 if __name__ == '__main__':

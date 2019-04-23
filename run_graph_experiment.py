@@ -3,15 +3,16 @@ from sys import argv
 from subprocess import run
 from time import process_time, sleep
 
-from distributed import Client
 from pandas import DataFrame
 
 from generate import generate
 from gordium import Gordium
 from prepare_admin_import import prepare_admin_import
 
+from numpy.random import seed
+seed(0)
+
 if __name__ == '__main__':
-    client = Client()
     start_time = process_time()
     records = list()
     orders_of_magnitude = range(1, 6)

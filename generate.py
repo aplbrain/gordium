@@ -6,11 +6,9 @@ import dask.dataframe as dd
 from dask.array import concatenate, unique
 from dask.array.random import randint
 from dask.dataframe import DataFrame
-# from dask.distributed import Client
 
 def generate(n_nodes):
-    EDGE_FRACTION = 0.2
-    # client = Client()
+    EDGE_FRACTION = 0.01
     n_edges_max = n_nodes * n_nodes # allow self-loops
     n_edges = int(n_edges_max*EDGE_FRACTION)
     edges = randint(0, n_nodes, size=(2*n_edges, 2))
@@ -26,9 +24,8 @@ def generate(n_nodes):
     edges.repartition(npartitions=8)
     positions.repartition(npartitions=8)
     edges = edges.loc[:n_edges]
-    positions = positions.loc[:edges.shape[0]-1]
+    positions = positions.loc[:edges.shape[0]]
     df = dd.concat([edges, positions], axis=1)
-    # client.close()
     return df
 
 if __name__ == '__main__':
