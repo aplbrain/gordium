@@ -17,13 +17,14 @@ if __name__ == '__main__':
     EDGE_DENSITY = 0.01
     start_time = process_time()
     records = list()
-    orders_of_magnitude = range(1, 6)
+    orders_of_magnitude = range(1, 4)
     for oom in orders_of_magnitude:
         record = dict()
         record['start_time'] = process_time()
         n_edges_desired = 10**oom
         n_nodes = int(1.1*sqrt(n_edges_desired/EDGE_DENSITY))
         edgeframe = generate(n_nodes, edge_density=EDGE_DENSITY)
+        edgeframe.to_csv('/store/random/*.csv')
         record['generate_time'] = process_time()
         prepare_admin_import(edgeframe, '/store/import')
         edgeframe = None
