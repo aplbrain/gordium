@@ -13,12 +13,12 @@ seed(0)
 def generate(n_nodes, edge_density=0.2):
     n_edges_max = n_nodes * n_nodes # allow self-loops
     n_edges = int(n_edges_max*edge_density)
-    edges = randint(0, n_nodes, size=(1.2*n_edges, 2))
+    edges = randint(0, n_nodes, size=(n_edges, 2))
     edges = dd.from_dask_array(
             edges,
             columns=['presyn_segid', 'postsyn_segid'])
     edges = edges.drop_duplicates()
-    positions = randint(0, 1_000_000, size=(1.2*n_edges, 3))
+    positions = randint(0, 1_000_000, size=(n_edges, 3))
     positions = dd.from_dask_array(
             positions,
             columns = ['centroid_x', 'centroid_y', 'centroid_z'])
