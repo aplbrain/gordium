@@ -5,18 +5,22 @@ from subprocess import run
 from time import process_time, sleep
 
 from dask.array.random import seed
+import dask.dataframe as dd
+from networkx import DiGraph, from_pandas_edgelist
 from pandas import DataFrame
 
 from generate import generate
 from gordium import Gordium
 from prepare_admin_import import prepare_admin_import
+from table import functions as table_fns
 
 seed(0)
 
 if __name__ == '__main__':
     EDGE_DENSITY = 0.01
     start_time = process_time()
-    records = list()
+    neo4j_records = list()
+    networkx_records = list()
     orders_of_magnitude = range(1, 4)
     for oom in orders_of_magnitude:
         record = dict()
@@ -24,8 +28,12 @@ if __name__ == '__main__':
         n_edges_desired = 10**oom
         n_nodes = int(1.1*sqrt(n_edges_desired/EDGE_DENSITY))
         edgeframe = generate(n_nodes, edge_density=EDGE_DENSITY)
-        edgeframe.to_csv('/store/random/*.csv')
+        edgeframe.to_csv('/store/random/*.csv', index=False)
         record['generate_time'] = process_time()
+        edgeframe = None
+        # run for Neo4j
+        edgeframe = dd.read_csv('/store/random/*.csv')
+        record['read_time'] = process_time()
         prepare_admin_import(edgeframe, '/store/import')
         edgeframe = None
         record['convert_time'] = process_time()
@@ -50,8 +58,30 @@ if __name__ == '__main__':
         run('docker kill neuprint-db'.split())
         record['db_down_time'] = process_time()
         run('docker run -it --rm -v /store/data:/data -v /store/import:/import -v /home/ec2-user/gordium/scripts:/scripts --entrypoint /scripts/clear_command.sh neo4j'.split())
+        graph = None
         record['end_time'] = process_time()
-        records.append(record)
-        records_df = DataFrame(records)
-        records_df.to_csv('graph_experiment_benchmarks.csv', index=False)
+        neo4j_records.append(record)
+        neo4j_records_df = DataFrame(neo4j_records)
+        neo4j_records_df.to_csv('graph_experiment_benchmarks_neo4j.csv', index=False)
+        # run for NetworkX
+        record = dict()
+        record['start_time'] = process_time()
+        edgeframe = dd.read_csv('/store/random/*.csv').compute()
+        record['read_time'] = process_time()
+        graph = from_pandas_edgelist(
+                edgeframe,
+                source='presyn_segid',
+                target='postsyn_segid',
+                edge_attr=True,
+                create_using=DiGraph)
+        edgeframe = None
+        record['convert_time'] = process_time()
+        for fn in table_fns:
+            record[fn.__name__] = fn(graph)
+            record['{}_time'.format(fn.__name__)] = process_time()
+        graph = None
+        record['end_time'] = process_time()
+        networkx_records.append(record)
+        networkx_records_df = DataFrame(networkx_records)
+        networkx_records_df.to_csv('graph_experiment_benchmarks_networkx.csv', index=False)
 

@@ -17,16 +17,10 @@ def two_core_order(graph):
 functions = [
         rename(
             lambda graph: graph.order(),
-            'nodes'),
+            'number_of_nodes'),
         rename(
             lambda graph: graph.size(),
-            'edges'),
-        rename(
-            lambda graph: len(list(component for component in nx.weakly_connected_components(graph) if len(component) == 1)),
-            'number_of_orphans'),
-        rename(
-            lambda graph: len(list(component for component in nx.weakly_connected_components(graph) if len(component) == 2)),
-            'number_of_lone_pairs'),
+            'number_of_edges'),
         rename(
             lambda graph: len(list(graph.selfloop_edges())),
             'number_of_loops'),
@@ -35,13 +29,19 @@ functions = [
             'number_of_leaves'),
         rename(
             lambda graph: len(list(degree for _, degree in graph.degree() if degree > 1_000)),
-            'number_of_degree_over_1000'),
+            'number_of_nodes_with_degree_over_1000'),
+        rename(
+            lambda graph: max(degree for _, degree in graph.degree()),
+            'max_degree'),
         rename(
             lambda graph: sum(degree for _, degree in graph.degree())/graph.order(),
             'mean_degree'),
         rename(
-            lambda graph: max(degree for _, degree in graph.degree()),
-            'max_degree'),
+            lambda graph: len(list(component for component in nx.weakly_connected_components(graph) if len(component) == 1)),
+            'number_of_orphans'),
+        rename(
+            lambda graph: len(list(component for component in nx.weakly_connected_components(graph) if len(component) == 2)),
+            'number_of_lone_pairs'),
         two_core_order,
         rename(
             lambda graph: max(len(component) for component in nx.strongly_connected_components(graph)),
