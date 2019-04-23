@@ -4,11 +4,13 @@ from sys import argv
 import dask.dataframe as dd
 
 from dask.dataframe import read_csv
+from dask.array.random import seed as da_seed
 from numpy import union1d
+from numpy.random import seed as np_seed
 from pandas import DataFrame
 
-from numpy.random import seed
-seed(0)
+da_seed(0)
+np_seed(0)
 
 def prepare_admin_import(df, export_dir):
 

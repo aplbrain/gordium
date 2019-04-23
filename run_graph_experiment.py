@@ -4,13 +4,13 @@ from sys import argv
 from subprocess import run
 from time import process_time, sleep
 
+from dask.array.random import seed
 from pandas import DataFrame
 
 from generate import generate
 from gordium import Gordium
 from prepare_admin_import import prepare_admin_import
 
-from numpy.random import seed
 seed(0)
 
 if __name__ == '__main__':

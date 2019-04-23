@@ -5,10 +5,9 @@ import dask.array as da
 import dask.dataframe as dd
 
 from dask.array import concatenate, unique
-from dask.array.random import randint
+from dask.array.random import randint, seed
 from dask.dataframe import DataFrame
 
-from numpy.random import seed
 seed(0)
 
 def generate(n_nodes, edge_density=0.2):
@@ -28,9 +27,6 @@ def generate(n_nodes, edge_density=0.2):
     positions = positions.loc[:(edges.shape[0]-1)]
     edges.repartition(npartitions=cpu_count())
     positions.repartition(npartitions=cpu_count())
-    print(n_edges)
-    print(edges.shape[0].compute())
-    print(positions.shape[0].compute())
     df = dd.concat([edges, positions], axis=1)
     return df
 
