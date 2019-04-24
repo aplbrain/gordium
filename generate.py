@@ -28,6 +28,7 @@ def generate(n_nodes, edge_density=0.2):
     edges.repartition(npartitions=cpu_count())
     positions.repartition(npartitions=cpu_count())
     df = dd.concat([edges, positions], axis=1)
+    df = df.dropna()
     return df
 
 if __name__ == '__main__':
