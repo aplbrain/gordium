@@ -21,7 +21,7 @@ if __name__ == '__main__':
     start_time = process_time()
     neo4j_records = list()
     networkx_records = list()
-    orders_of_magnitude = range(1, 4)
+    orders_of_magnitude = range(1, 10)
     for oom in orders_of_magnitude:
         record = dict()
         record['start_time'] = process_time()
@@ -29,6 +29,8 @@ if __name__ == '__main__':
         n_nodes = int(1.1*sqrt(n_edges_desired/EDGE_DENSITY))
         edgeframe = generate(n_nodes, edge_density=EDGE_DENSITY)
         edgeframe.to_csv('/store/random/*.csv', index=False)
+        if oom <= 7:
+            edgeframe.to_csv('/home/ec2-user/gordium/edgeframe_{}/*.csv'.format(oom), index=False)
         record['generate_time'] = process_time()
         edgeframe = None
         # run for Neo4j
