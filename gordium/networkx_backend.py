@@ -20,11 +20,11 @@ class NetworkXBackend(GraphBackend):
         return self._graph.size()
 
     def number_of_loops(self):
-        return len(list(graph.selfloop_edges()))
+        return len(list(self._graph.selfloop_edges()))
 
     def degree_histogram(self):
         if self._degree is None:
-            self._degree = pd.DataFrame(
+            self._degree = DataFrame(
                     self._graph.degree(),
                     columns=['n_id', 'degree']).degree.value_counts()
         return self._degree
