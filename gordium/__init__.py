@@ -1,4 +1,5 @@
 from ._backend import BoundingBox, DataFrame, GraphBackend
+from .networkx_backend import NetworkXBackend
 
 class Gordium():
 
@@ -27,7 +28,7 @@ class Gordium():
         analytics = list()
         analytic = dict()
         for fn in self.fns:
-            analytic[fn.__name__] = fn(bounding_box)
+            analytic[fn.__name__] = fn()
         analytics.append(analytic)
         analytics = DataFrame(analytics)
         return analytics
