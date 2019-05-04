@@ -11,7 +11,9 @@ class NetworkXBackend(GraphBackend):
                 target='postsyn_segid',
                 edge_attr=True,
                 create_using=nx.DiGraph)
-        self._degree = None
+        self._dh = None
+        self._scch = None
+        self._wcch = None
 
     def number_of_nodes(self):
         return self._graph.order()
@@ -23,21 +25,21 @@ class NetworkXBackend(GraphBackend):
         return len(list(self._graph.selfloop_edges()))
 
     def degree_histogram(self):
-        if self._degree is None:
-            self._degree = DataFrame(
+        if self._dh is None:
+            self._dh = DataFrame(
                     self._graph.degree(),
                     columns=['n_id', 'degree']).degree.value_counts()
-        return self._degree
+        return self._dh
 
-    def number_of_orphans(self):
-        return len(list(component for component in nx.weakly_connected_components(self._graph) if len(component) == 1))
+    def scc_histogram(self):
+        if self._scch is None:
+            self._scch = [len(cc) for cc in nx.strongly_connected_components(self._graph)]
+            self._scch = DataFrame(self._scch, columns=["cc_size"]).cc_size.value_counts()
+        return self._scch
 
-    def number_of_lone_pairs(self):
-        return len(list(component for component in nx.weakly_connected_components(self._graph) if len(component) == 2))
-
-    def max_strongly_connected_component_order(self):
-        return max(len(component) for component in nx.strongly_connected_components(self._graph))
-
-    def max_weakly_connected_component_order(self):
-        return max(len(component) for component in nx.weakly_connected_components(self._graph))
+    def wcc_histogram(self):
+        if self._wcch is None:
+            self._wcch = [len(cc) for cc in nx.weakly_connected_components(self._graph)]
+            self._wcch = DataFrame(self._wcch, columns=["cc_size"]).cc_size.value_counts()
+        return self._wcch
 
