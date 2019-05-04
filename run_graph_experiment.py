@@ -21,11 +21,11 @@ if __name__ == '__main__':
     start_time = perf_counter()
     neo4j_records = list()
     networkx_records = list()
-    orders_of_magnitude = range(1, 10)
+    orders_of_magnitude = [9] # range(1, 10)
     for oom in orders_of_magnitude:
         record = dict()
         record['start_time'] = perf_counter()
-        n_edges_desired = 10**oom
+        n_edges_desired = 500e6 # 10**oom
         n_nodes = int(1.1*sqrt(n_edges_desired/EDGE_DENSITY))
         edgeframe = generate(n_nodes, edge_density=EDGE_DENSITY)
         edgeframe.to_csv('/store/random/*.csv', index=False)
@@ -59,12 +59,12 @@ if __name__ == '__main__':
             record['{}_time'.format(fn.__name__)] = perf_counter()
         run('docker kill neuprint-db'.split())
         record['db_down_time'] = perf_counter()
-        run('docker run -it --rm -v /store/data:/data -v /store/import:/import -v /home/ec2-user/gordium/scripts:/scripts --entrypoint /scripts/clear_command.sh neo4j'.split())
+        # run('docker run -it --rm -v /store/data:/data -v /store/import:/import -v /home/ec2-user/gordium/scripts:/scripts --entrypoint /scripts/clear_command.sh neo4j'.split())
         graph = None
         record['end_time'] = perf_counter()
         neo4j_records.append(record)
         neo4j_records_df = DataFrame(neo4j_records)
-        neo4j_records_df.to_csv('graph_experiment_benchmarks_neo4j.csv', index=False)
+        neo4j_records_df.to_csv('graph_experiment_benchmarks_neo4j_500m.csv', index=False)
         # run for NetworkX
         record = dict()
         record['start_time'] = perf_counter()
@@ -85,5 +85,5 @@ if __name__ == '__main__':
         record['end_time'] = perf_counter()
         networkx_records.append(record)
         networkx_records_df = DataFrame(networkx_records)
-        networkx_records_df.to_csv('graph_experiment_benchmarks_networkx.csv', index=False)
+        networkx_records_df.to_csv('graph_experiment_benchmarks_networkx_500m.csv', index=False)
 
