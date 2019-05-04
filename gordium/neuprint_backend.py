@@ -9,7 +9,9 @@ class NeuPrintBackend(GraphBackend):
                 db_bolt_uri="bolt://localhost:7687",
                 username="neo4j",
                 password="neuprint")
-        self._degree = None
+        self._dh = None
+        self._scch = None
+        self._wcch = None
 
     def number_of_nodes(
             self,
@@ -75,7 +77,7 @@ class NeuPrintBackend(GraphBackend):
     def degree_histogram(
             self,
             bounding_box:BoundingBox=None) -> int:
-        if self._degree is None:
+        if self._dh is None:
             query:str = ""
             if bounding_box is not None:
                 query += self._spatial_subset(bounding_box)
@@ -93,111 +95,65 @@ class NeuPrintBackend(GraphBackend):
                 WITH degree, COUNT(DISTINCT n) AS frequency
                 RETURN degree, frequency;
                 """
-            self._degree = self._graph.run(query).to_data_frame()
-            self._degree = self._degree.set_index("degree").frequency
-        return self._degree
+            self._dh = self._graph.run(query).to_data_frame()
+            self._dh = self._dh.set_index("degree").frequency
+        return self._dh
 
-    def number_of_orphans(
+    def scc_histogram(
             self,
             bounding_box:BoundingBox=None) -> int:
-        if bounding_box is not None:
-            node_query:str = self._spatial_node_query(bounding_box)
-            relationship_query:str = self._spatial_relationship_query(bounding_box)
-            query:str = """
-            CALL algo.unionFind.stream("{}", "{}", {{graph: "cypher"}})
-            YIELD nodeId, setId
-            WITH setId, COUNT(nodeId) AS order_of_component
-            WHERE order_of_component = 1
-            WITH COUNT(order_of_component) AS metric
-            RETURN metric;
-            """.format(
-                    node_query,
-                    relationship_query)
-        else:
-            query:str = """
-            CALL algo.unionFind.stream("Neuron", "ConnectsTo", {graph: "huge"})
-            YIELD nodeId, setId
-            WITH setId, COUNT(nodeId) AS order_of_component
-            WHERE order_of_component = 1
-            WITH COUNT(order_of_component) AS metric
-            RETURN metric;
-            """
-        return self._compute_metric(query)
+        if self._scch is None:
+            if bounding_box is not None:
+                node_query:str = self._spatial_node_query(bounding_box)
+                relationship_query:str = self._spatial_relationship_query(bounding_box)
+                query:str = """
+                CALL algo.scc.stream("{}", "{}", {{graph: "cypher"}})
+                YIELD nodeId, partition
+                WITH partition, COUNT(DISTINCT nodeId) AS cc_size
+                WITH cc_size, COUNT(DISTINCT partition) AS frequency
+                RETURN cc_size, frequency;
+                """.format(
+                        node_query,
+                        relationship_query)
+            else:
+                query:str = """
+                CALL algo.scc.stream("Neuron", "ConnectsTo")
+                YIELD nodeId, partition
+                WITH partition, COUNT(DISTINCT nodeId) AS cc_size
+                WITH cc_size, COUNT(DISTINCT partition) AS frequency
+                RETURN cc_size, frequency;
+                """
+            self._scch = self._graph.run(query).to_data_frame()
+            self._scch = self._scch.set_index("cc_size").frequency
+        return self._scch
 
-    def number_of_lone_pairs(
+    def wcc_histogram(
             self,
             bounding_box:BoundingBox=None) -> int:
-        if bounding_box is not None:
-            node_query:str = self._spatial_node_query(bounding_box)
-            relationship_query:str = self._spatial_relationship_query(bounding_box)
-            query:str = """
-            CALL algo.unionFind.stream("{}", "{}", {{graph: "cypher"}})
-            YIELD nodeId, setId
-            WITH setId, COUNT(nodeId) AS order_of_component
-            WHERE order_of_component = 2
-            WITH COUNT(order_of_component) AS metric
-            RETURN metric;
-            """.format(
-                    node_query,
-                    relationship_query)
-        else:
-            query:str = """
-            CALL algo.unionFind.stream("Neuron", "ConnectsTo", {graph: "huge"})
-            YIELD nodeId, setId
-            WITH setId, COUNT(nodeId) AS order_of_component
-            WHERE order_of_component = 2
-            WITH COUNT(order_of_component) AS metric
-            RETURN metric;
-            """
-        return self._compute_metric(query)    
-
-    def max_strongly_connected_component_order(
-            self,
-            bounding_box:BoundingBox=None) -> int:
-        if bounding_box is not None:
-            node_query:str = self._spatial_node_query(bounding_box)
-            relationship_query:str = self._spatial_relationship_query(bounding_box)
-            query:str = """
-            CALL algo.scc("{}", "{}", {{graph: "cypher"}})
-            YIELD maxSetSize
-            WITH maxSetSize AS metric
-            RETURN metric;
-            """.format(
-                    node_query,
-                    relationship_query)
-        else:
-            query:str = """
-            CALL algo.scc("Neuron", "ConnectsTo")
-            YIELD maxSetSize
-            WITH maxSetSize AS metric
-            RETURN metric;
-            """
-        return self._compute_metric(query)
-
-    def max_weakly_connected_component_order(
-            self,
-            bounding_box:BoundingBox=None) -> int:
-        if bounding_box is not None:
-            node_query:str = self._spatial_node_query(bounding_box)
-            relationship_query:str = self._spatial_relationship_query(bounding_box)
-            query:str = """
-            CALL algo.unionFind.stream("{}", "{}", {{graph: "cypher"}})
-            YIELD nodeId, setId
-            WITH setId, COUNT(nodeId) AS order_of_component
-            WITH MAX(order_of_component) AS metric
-            RETURN metric;
-            """.format(
-                    node_query,
-                    relationship_query)
-        else:
-            query:str = """
-            CALL algo.unionFind.stream("Neuron", "ConnectsTo", {graph: "huge"})
-            YIELD nodeId, setId
-            WITH setId, COUNT(nodeId) AS order_of_component
-            WITH MAX(order_of_component) AS metric
-            RETURN metric;
-            """
-        return self._compute_metric(query)
+        if self._wcch is None:
+            if bounding_box is not None:
+                node_query:str = self._spatial_node_query(bounding_box)
+                relationship_query:str = self._spatial_relationship_query(bounding_box)
+                query:str = """
+                CALL algo.unionFind.stream("{}", "{}", {{graph: "cypher"}})
+                YIELD nodeId, setId
+                WITH setId, COUNT(DISTINCT nodeId) AS cc_size
+                WITH cc_size, COUNT(DISTINCT setId) AS frequency
+                RETURN cc_size, frequency;
+                """.format(
+                        node_query,
+                        relationship_query)
+            else:
+                query:str = """
+                CALL algo.unionFind.stream("Neuron", "ConnectsTo")
+                YIELD nodeId, setId
+                WITH setId, COUNT(DISTINCT nodeId) AS cc_size
+                WITH cc_size, COUNT(DISTINCT setId) AS frequency
+                RETURN cc_size, frequency;
+                """
+            self._wcch = self._graph.run(query).to_data_frame()
+            self._wcch = self._wcch.set_index("cc_size").frequency 
+        return self._wcch
 
     def _spatial_subset(self, bounding_box:BoundingBox) -> str:
         subset:str = """
