@@ -4,7 +4,9 @@ from ._backend import BoundingBox, DataFrame, GraphBackend
 
 class NeuPrintBackend(GraphBackend):
 
-    def __init__(self, edgeframe:DataFrame):
+    def __init__(
+            self,
+            edgeframe:DataFrame):
         self._graph = Neo4jExecutor(
                 db_bolt_uri="bolt://localhost:7687",
                 username="neo4j",
@@ -95,7 +97,7 @@ class NeuPrintBackend(GraphBackend):
                 WITH degree, COUNT(DISTINCT n) AS frequency
                 RETURN degree, frequency;
                 """
-            self._dh = self._graph.run(query).to_data_frame()
+            self._dh = self._graph.run(query).to_data_frame(columns=["degree", "frequency"])
             self._dh = self._dh.set_index("degree").frequency
         return self._dh
 
@@ -123,7 +125,7 @@ class NeuPrintBackend(GraphBackend):
                 WITH cc_order, COUNT(DISTINCT partition) AS frequency
                 RETURN cc_order, frequency;
                 """
-            self._scch = self._graph.run(query).to_data_frame()
+            self._scch = self._graph.run(query).to_data_frame(columns=["cc_order", "frequency"])
             self._scch = self._scch.set_index("cc_order").frequency
         return self._scch
 
@@ -151,7 +153,7 @@ class NeuPrintBackend(GraphBackend):
                 WITH cc_order, COUNT(DISTINCT setId) AS frequency
                 RETURN cc_order, frequency;
                 """
-            self._wcch = self._graph.run(query).to_data_frame()
+            self._wcch = self._graph.run(query).to_data_frame(columns=["cc_order", "frequency"])
             self._wcch = self._wcch.set_index("cc_order").frequency
         return self._wcch
 

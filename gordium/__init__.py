@@ -29,7 +29,7 @@ class Gordium():
         analytics = list()
         analytic = dict()
         for fn in self.fns:
-            analytic[fn.__name__] = fn()
+            analytic[fn.__name__] = fn(bounding_box)
         analytics.append(analytic)
         analytics = DataFrame(analytics)
         return analytics
