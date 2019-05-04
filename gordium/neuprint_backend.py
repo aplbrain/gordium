@@ -109,9 +109,9 @@ class NeuPrintBackend(GraphBackend):
                 query:str = """
                 CALL algo.scc.stream("{}", "{}", {{graph: "cypher"}})
                 YIELD nodeId, partition
-                WITH partition, COUNT(DISTINCT nodeId) AS cc_size
-                WITH cc_size, COUNT(DISTINCT partition) AS frequency
-                RETURN cc_size, frequency;
+                WITH partition, COUNT(DISTINCT nodeId) AS cc_order
+                WITH cc_order, COUNT(DISTINCT partition) AS frequency
+                RETURN cc_order, frequency;
                 """.format(
                         node_query,
                         relationship_query)
@@ -119,12 +119,12 @@ class NeuPrintBackend(GraphBackend):
                 query:str = """
                 CALL algo.scc.stream("Neuron", "ConnectsTo")
                 YIELD nodeId, partition
-                WITH partition, COUNT(DISTINCT nodeId) AS cc_size
-                WITH cc_size, COUNT(DISTINCT partition) AS frequency
-                RETURN cc_size, frequency;
+                WITH partition, COUNT(DISTINCT nodeId) AS cc_order
+                WITH cc_order, COUNT(DISTINCT partition) AS frequency
+                RETURN cc_order, frequency;
                 """
             self._scch = self._graph.run(query).to_data_frame()
-            self._scch = self._scch.set_index("cc_size").frequency
+            self._scch = self._scch.set_index("cc_order").frequency
         return self._scch
 
     def wcc_histogram(
@@ -137,9 +137,9 @@ class NeuPrintBackend(GraphBackend):
                 query:str = """
                 CALL algo.unionFind.stream("{}", "{}", {{graph: "cypher"}})
                 YIELD nodeId, setId
-                WITH setId, COUNT(DISTINCT nodeId) AS cc_size
-                WITH cc_size, COUNT(DISTINCT setId) AS frequency
-                RETURN cc_size, frequency;
+                WITH setId, COUNT(DISTINCT nodeId) AS cc_order
+                WITH cc_order, COUNT(DISTINCT setId) AS frequency
+                RETURN cc_order, frequency;
                 """.format(
                         node_query,
                         relationship_query)
@@ -147,12 +147,12 @@ class NeuPrintBackend(GraphBackend):
                 query:str = """
                 CALL algo.unionFind.stream("Neuron", "ConnectsTo")
                 YIELD nodeId, setId
-                WITH setId, COUNT(DISTINCT nodeId) AS cc_size
-                WITH cc_size, COUNT(DISTINCT setId) AS frequency
-                RETURN cc_size, frequency;
+                WITH setId, COUNT(DISTINCT nodeId) AS cc_order
+                WITH cc_order, COUNT(DISTINCT setId) AS frequency
+                RETURN cc_order, frequency;
                 """
             self._wcch = self._graph.run(query).to_data_frame()
-            self._wcch = self._wcch.set_index("cc_size").frequency 
+            self._wcch = self._wcch.set_index("cc_order").frequency
         return self._wcch
 
     def _spatial_subset(self, bounding_box:BoundingBox) -> str:
