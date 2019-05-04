@@ -46,18 +46,26 @@ class GraphBackend(ABC):
         return degree.dot(degree.index)/degree.sum()
 
     @abstractmethod
-    def number_of_orphans(self):
+    def scc_histogram(self):
         pass
 
-    @abstractmethod
-    def number_of_lone_pairs(self):
-        pass
-
-    @abstractmethod
     def max_strongly_connected_component_order(self):
-        pass
+        scch = self.scc_histogram()
+        return scch.index.max()
 
     @abstractmethod
-    def max_weakly_connected_component_order(self):
+    def wcc_histogram(self):
         pass
+
+    def number_of_orphans(self):
+        wcch = self.wcc_histogram()
+        return wcch[1]
+
+    def number_of_lone_pairs(self):
+        wcch = self.wcc_histogram()
+        return wcch[2]
+
+    def max_weakly_connected_component_order(self):
+        wcch = self.wcc_histogram()
+        return wcch.index.max()
 
