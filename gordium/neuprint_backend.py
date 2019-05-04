@@ -11,9 +11,9 @@ class NeuPrintBackend(GraphBackend):
                 db_bolt_uri="bolt://localhost:7687",
                 username="neo4j",
                 password="neuprint")
-        self._dh = None
-        self._scch = None
-        self._wcch = None
+        self._dh = dict()
+        self._scch = dict()
+        self._wcch = dict()
 
     def number_of_nodes(
             self,
@@ -79,7 +79,7 @@ class NeuPrintBackend(GraphBackend):
     def degree_histogram(
             self,
             bounding_box:BoundingBox=None) -> int:
-        if self._dh is None:
+        if bounding_box not in self._dh:
             query:str = ""
             if bounding_box is not None:
                 query += self._spatial_subset(bounding_box)
@@ -97,14 +97,14 @@ class NeuPrintBackend(GraphBackend):
                 WITH degree, COUNT(DISTINCT n) AS frequency
                 RETURN degree, frequency;
                 """
-            self._dh = self._graph.run(query).to_data_frame(columns=["degree", "frequency"])
-            self._dh = self._dh.set_index("degree").frequency
-        return self._dh
+            self._dh[bounding_box] = self._graph.run(query).to_data_frame(columns=["degree", "frequency"])
+            self._dh[bounding_box] = self._dh[bounding_box].set_index("degree").frequency
+        return self._dh[bounding_box]
 
     def scc_histogram(
             self,
             bounding_box:BoundingBox=None) -> int:
-        if self._scch is None:
+        if bounding_box not in self._scch:
             if bounding_box is not None:
                 node_query:str = self._spatial_node_query(bounding_box)
                 relationship_query:str = self._spatial_relationship_query(bounding_box)
@@ -125,14 +125,14 @@ class NeuPrintBackend(GraphBackend):
                 WITH cc_order, COUNT(DISTINCT partition) AS frequency
                 RETURN cc_order, frequency;
                 """
-            self._scch = self._graph.run(query).to_data_frame(columns=["cc_order", "frequency"])
-            self._scch = self._scch.set_index("cc_order").frequency
-        return self._scch
+            self._scch[bounding_box] = self._graph.run(query).to_data_frame(columns=["cc_order", "frequency"])
+            self._scch[bounding_box] = self._scch[bounding_box].set_index("cc_order").frequency
+        return self._scch[bounding_box]
 
     def wcc_histogram(
             self,
             bounding_box:BoundingBox=None) -> int:
-        if self._wcch is None:
+        if bounding_box not in self._wcch:
             if bounding_box is not None:
                 node_query:str = self._spatial_node_query(bounding_box)
                 relationship_query:str = self._spatial_relationship_query(bounding_box)
@@ -153,9 +153,9 @@ class NeuPrintBackend(GraphBackend):
                 WITH cc_order, COUNT(DISTINCT setId) AS frequency
                 RETURN cc_order, frequency;
                 """
-            self._wcch = self._graph.run(query).to_data_frame(columns=["cc_order", "frequency"])
-            self._wcch = self._wcch.set_index("cc_order").frequency
-        return self._wcch
+            self._wcch[bounding_box] = self._graph.run(query).to_data_frame(columns=["cc_order", "frequency"])
+            self._wcch[bounding_box] = self._wcch[bounding_box].set_index("cc_order").frequency
+        return self._wcch[bounding_box]
 
     def _spatial_subset(self, bounding_box:BoundingBox) -> str:
         subset:str = """
