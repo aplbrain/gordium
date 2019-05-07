@@ -48,6 +48,24 @@ class GraphBackend(ABC):
         return 0 if order==0 else dh.dot(dh.index)/order
 
     @abstractmethod
+    def in_degree_histogram(self, bounding_box:BoundingBox=None):
+        pass
+
+    def number_of_sources(self, bounding_box:BoundingBox=None):
+        idh = self.in_degree_histogram(bounding_box)
+        order = idh.sum()
+        return 0 if order==0 else idh.get(key=0, default=0)
+
+    @abstractmethod
+    def out_degree_histogram(self, bounding_box:BoundingBox=None):
+        pass
+
+    def number_of_sinks(self, bounding_box:BoundingBox=None):
+        odh = self.out_degree_histogram(bounding_box)
+        order = odh.sum()
+        return 0 if order==0 else odh.get(key=0, default=0)
+
+    @abstractmethod
     def scc_histogram(self, bounding_box:BoundingBox=None):
         pass
 

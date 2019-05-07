@@ -14,6 +14,8 @@ class NetworkXBackend(GraphBackend):
                 edge_attr=True,
                 create_using=nx.DiGraph)
         self._dh = None
+        self._idh = None
+        self._odh = None
         self._scch = None
         self._wcch = None
 
@@ -40,6 +42,24 @@ class NetworkXBackend(GraphBackend):
                     self._graph.degree(),
                     columns=["n_id", "degree"]).degree.value_counts()
         return self._dh
+
+    def in_degree_histogram(
+            self,
+            bounding_box:BoundingBox=None):
+        if self._idh is None:
+            self._idh = DataFrame(
+                    self._graph.in_degree(),
+                    columns=["n_id", "in_degree"]).in_degree.value_counts()
+        return self._idh
+
+    def out_degree_histogram(
+            self,
+            bounding_box:BoundingBox=None):
+        if self._odh is None:
+            self._odh = DataFrame(
+                    self._graph.out_degree(),
+                    columns=["n_id", "out_degree"]).out_degree.value_counts()
+        return self._odh
 
     def scc_histogram(
             self,
