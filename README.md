@@ -16,7 +16,6 @@ from gordium import Gordium
 edgeframe = pd.read_csv('example.csv')
 g = Gordium(edgeframe)
 analytics = g.process()
-
 ```
 
 ## Graph Backends
