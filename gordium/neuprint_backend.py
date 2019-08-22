@@ -3,6 +3,13 @@ from dotmotif.executors import Neo4jExecutor
 from ._backend import BoundingBox, DataFrame, GraphBackend
 
 class NeuPrintBackend(GraphBackend):
+    """
+    This graph backend is inspired by the data model from
+    a version of neuPrint from the FlyEM team at HHMI's
+    Janelia research campus. Only the Neurons, ConnectionSets,
+    Synapses, and the edges between them are replicated. The
+    data model can be found here: https://github.com/connectome-neuprint/neuPrint/blob/23a9f1c21837096947e491b6953f1cbe12067d01/pgmspecs.md.
+    """
 
     def __init__(
             self,
