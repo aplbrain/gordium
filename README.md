@@ -9,14 +9,11 @@ pip install -e .
 
 ## Usage
 ```
-from getpass import getpass
+import pandas as pd
 from gordium import Gordium
 
-# Enter Neo4j Password
-pswd = getpass()
-
-# Connect to Neo4j and Run
-g = Gordium('bolt://gordium:7687', password=pswd)
+edgeframe = pd.read_csv('example.csv')
+g = Gordium(edgeframe)
 analytics = g.process()
 ```
 
