@@ -3,10 +3,6 @@ from collections import namedtuple
 
 from pandas import DataFrame
 
-BoundingBox = namedtuple(
-        "BoundingBox",
-        "x_lower y_lower z_lower x_upper y_upper z_upper")
-
 class GraphBackend(ABC):
 
     @abstractmethod
@@ -18,62 +14,62 @@ class GraphBackend(ABC):
         pass
 
     @abstractmethod
-    def number_of_nodes(self, bounding_box:BoundingBox=None):
+    def number_of_nodes(self):
         pass
 
     @abstractmethod
-    def number_of_edges(self, bounding_box:BoundingBox=None):
+    def number_of_edges(self):
         pass
 
     @abstractmethod
-    def number_of_loops(self, bounding_box:BoundingBox=None):
+    def number_of_loops(self):
         pass
 
     @abstractmethod
-    def degree_histogram(self, bounding_box:BoundingBox=None):
+    def degree_histogram(self):
         pass
 
-    def number_of_leaves(self, bounding_box:BoundingBox=None):
-        dh = self.degree_histogram(bounding_box)
+    def number_of_leaves(self):
+        dh = self.degree_histogram()
         return dh.get(key=1, default=0)
 
-    def number_of_nodes_with_degree_over_1000(self, bounding_box:BoundingBox=None):
-        dh = self.degree_histogram(bounding_box)
+    def number_of_nodes_with_degree_over_1000(self):
+        dh = self.degree_histogram()
         return dh[dh.index > 1000].sum()
 
-    def max_degree(self, bounding_box:BoundingBox=None):
-        dh = self.degree_histogram(bounding_box)
+    def max_degree(self):
+        dh = self.degree_histogram()
         order = dh.sum()
         return 0 if order==0 else dh.index.max()
 
-    def mean_degree(self, bounding_box:BoundingBox=None):
-        dh = self.degree_histogram(bounding_box)
+    def mean_degree(self):
+        dh = self.degree_histogram()
         order = dh.sum()
         return 0 if order==0 else dh.dot(dh.index)/order
 
     @abstractmethod
-    def scc_histogram(self, bounding_box:BoundingBox=None):
+    def scc_histogram(self):
         pass
 
-    def max_strongly_connected_component_order(self, bounding_box:BoundingBox=None):
-        scch = self.scc_histogram(bounding_box)
+    def max_strongly_connected_component_order(self):
+        scch = self.scc_histogram()
         order = scch.sum()
         return 0 if order==0 else scch.index.max()
 
     @abstractmethod
-    def wcc_histogram(self, bounding_box:BoundingBox=None):
+    def wcc_histogram(self):
         pass
 
-    def number_of_orphans(self, bounding_box:BoundingBox=None):
-        wcch = self.wcc_histogram(bounding_box)
+    def number_of_orphans(self):
+        wcch = self.wcc_histogram()
         return wcch.get(key=1, default=0)
 
-    def number_of_lone_pairs(self, bounding_box:BoundingBox=None):
-        wcch = self.wcc_histogram(bounding_box)
+    def number_of_lone_pairs(self):
+        wcch = self.wcc_histogram()
         return wcch.get(key=2, default=0)
 
-    def max_weakly_connected_component_order(self, bounding_box:BoundingBox=None):
-        wcch = self.wcc_histogram(bounding_box)
+    def max_weakly_connected_component_order(self):
+        wcch = self.wcc_histogram()
         order = wcch.sum()
         return 0 if order==0 else wcch.index.max()
 

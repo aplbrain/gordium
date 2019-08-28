@@ -1,4 +1,4 @@
-from ._backend import BoundingBox, DataFrame, GraphBackend
+from ._backend import DataFrame, GraphBackend
 from .networkx_backend import NetworkXBackend
 from .neuprint_backend import NeuPrintBackend
 try:
@@ -33,13 +33,11 @@ class Gordium():
                 self.graph.max_weakly_connected_component_order,
         ]
 
-    def process(
-                self,
-                bounding_box:BoundingBox=None) -> DataFrame:
+    def process(self) -> DataFrame:
         analytics = list()
         analytic = dict()
         for fn in self.fns:
-            analytic[fn.__name__] = fn(bounding_box)
+            analytic[fn.__name__] = fn()
         analytics.append(analytic)
         analytics = DataFrame(analytics)
         return analytics
