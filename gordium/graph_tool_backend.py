@@ -6,11 +6,13 @@ class GraphToolBackend(GraphBackend):
 
     def __init__(
             self,
-            edgeframe:DataFrame):
+            edgeframe:DataFrame,
+            src_label:str,
+            tgt_label:str):
         self._graph = nx.from_pandas_edgelist(
                 edgeframe,
-                source="presyn_segid",
-                target="postsyn_segid",
+                source=src_label,
+                target=tgt_label,
                 edge_attr=True,
                 create_using=nx.DiGraph)
         self._dh = None

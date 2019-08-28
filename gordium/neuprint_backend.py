@@ -13,7 +13,9 @@ class NeuPrintBackend(GraphBackend):
 
     def __init__(
             self,
-            edgeframe:DataFrame):
+            edgeframe:DataFrame,
+            src_label:str,
+            tgt_label:str):
         self._graph = Neo4jExecutor(
                 db_bolt_uri="bolt://localhost:7687",
                 username="neo4j",

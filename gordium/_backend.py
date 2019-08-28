@@ -10,7 +10,11 @@ BoundingBox = namedtuple(
 class GraphBackend(ABC):
 
     @abstractmethod
-    def __init__(self, edgeframe:DataFrame):
+    def __init__(
+            self,
+            edgeframe:DataFrame,
+            src_label:str,
+            tgt_label:str):
         pass
 
     @abstractmethod

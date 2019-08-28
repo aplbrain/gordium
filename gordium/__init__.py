@@ -17,8 +17,13 @@ class Gordium():
     def __init__(
             self,
             edgeframe:DataFrame,
-            backend:GraphBackend=NetworkXBackend):
-        self.graph = backend(edgeframe)
+            backend:GraphBackend=NetworkXBackend,
+            src_label:str="presyn_segid",
+            tgt_label:str="postsyn_segid"):
+        self.graph = backend(
+                edgeframe,
+                src_label,
+                tgt_label)
         self.fns = [
                 self.graph.number_of_nodes,
                 self.graph.number_of_edges,

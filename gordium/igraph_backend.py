@@ -6,11 +6,13 @@ class IGraphBackend(GraphBackend):
 
     def __init__(
             self,
-            edgeframe:DataFrame):
+            edgeframe:DataFrame,
+            src_label:str,
+            tgt_label:str):
         self._graph = igraph.Graph.TupleList(
                 edgeframe[[
-                        "presyn_segid",
-                        "postsyn_segid"]].drop_duplicates().itertuples(index=False),
+                        src_label,
+                        tgt_label]].drop_duplicates().itertuples(index=False),
                 directed=True)
         self._dh = None
         self._scch = None
