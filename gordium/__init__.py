@@ -2,11 +2,6 @@ from ._backend import BoundingBox, DataFrame, GraphBackend
 from .networkx_backend import NetworkXBackend
 from .neuprint_backend import NeuPrintBackend
 try:
-    import graph_tool
-    from .graph_tool_backend import GraphToolBackend
-except ModuleNotFoundError:
-    pass
-try:
     import igraph
     from .igraph_backend import IGraphBackend
 except ModuleNotFoundError:

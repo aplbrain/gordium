@@ -29,7 +29,6 @@ Current backends include:
 - NetworkXBackend
 - NeuPrintBackend (optional; requires [docker](https://www.docker.com/))
 - IGraphBackend (optional; requires [igraph](https://igraph.org/python/))
-- GraphToolBackend (optional; requires [graph-tool](https://graph-tool.skewed.de/))
 
 ```
 import pandas as pd
