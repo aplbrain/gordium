@@ -1,6 +1,5 @@
 from ._backend import DataFrame, GraphBackend
 from .networkx_backend import NetworkXBackend
-from .neuprint_backend import NeuPrintBackend
 try:
     import igraph
     from .igraph_backend import IGraphBackend
