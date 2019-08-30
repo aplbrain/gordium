@@ -1,15 +1,23 @@
-from ._backend import BoundingBox, DataFrame, GraphBackend
-from .igraph_backend import IGraphBackend
+from ._backend import DataFrame, GraphBackend
 from .networkx_backend import NetworkXBackend
-from .neuprint_backend import NeuPrintBackend
+try:
+    import igraph
+    from .igraph_backend import IGraphBackend
+except ModuleNotFoundError:
+    pass
 
 class Gordium():
 
     def __init__(
             self,
             edgeframe:DataFrame,
-            backend:GraphBackend):
-        self.graph = backend(edgeframe)
+            backend:GraphBackend=NetworkXBackend,
+            src_label:str="presyn_segid",
+            tgt_label:str="postsyn_segid"):
+        self.graph = backend(
+                edgeframe,
+                src_label,
+                tgt_label)
         self.fns = [
                 self.graph.number_of_nodes,
                 self.graph.number_of_edges,
@@ -24,13 +32,11 @@ class Gordium():
                 self.graph.max_weakly_connected_component_order,
         ]
 
-    def process(
-                self,
-                bounding_box:BoundingBox=None) -> DataFrame:
+    def process(self) -> DataFrame:
         analytics = list()
         analytic = dict()
         for fn in self.fns:
-            analytic[fn.__name__] = fn(bounding_box)
+            analytic[fn.__name__] = fn()
         analytics.append(analytic)
         analytics = DataFrame(analytics)
         return analytics
