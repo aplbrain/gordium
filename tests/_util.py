@@ -44,12 +44,12 @@ def get_complete_analytics(n):
             "number_of_nodes": n,
             "number_of_edges": n*(n-1)/2,
             "number_of_loops": 0,
-            "number_of_leaves": 0,
+            "number_of_leaves": 2 if n == 2 else 0,
             "number_of_nodes_with_degree_over_1000": n if n > 1001 else 0,
             "max_degree": n-1,
             "mean_degree": n-1,
             "number_of_orphans": 0,
             "number_of_lone_pairs": 1 if n == 2 else 0,
-            "max_strongly_connected_component_order": 0,
+            "max_strongly_connected_component_order": 1,
             "max_weakly_connected_component_order": n}])
     return analytics
