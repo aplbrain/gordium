@@ -25,7 +25,7 @@ class NetworkXBackend(GraphBackend):
         return self._graph.size()
 
     def number_of_loops(self):
-        return len(list(self._graph.selfloop_edges()))
+        return len(list(nx.selfloop_edges(self._graph)))
 
     def degree_histogram(self):
         if self._dh is None:
