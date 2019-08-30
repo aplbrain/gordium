@@ -13,7 +13,6 @@ class NetworkXBackend(GraphBackend):
                 edgeframe,
                 source=src_label,
                 target=tgt_label,
-                edge_attr=True,
                 create_using=nx.DiGraph)
         self._dh = None
         self._scch = None
