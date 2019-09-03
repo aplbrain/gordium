@@ -1,4 +1,5 @@
-from ._backend import DataFrame, GraphBackend
+from pandas import DataFrame
+from ._backend import GraphBackend
 from .networkx_backend import NetworkXBackend
 try:
     import igraph
@@ -14,22 +15,22 @@ class Gordium():
             backend:GraphBackend=NetworkXBackend,
             src_label:str="source",
             tgt_label:str="target"):
-        self.graph = backend(
+        self._backend = backend(
                 edgeframe,
                 src_label,
                 tgt_label)
         self.fns = [
-                self.graph.number_of_nodes,
-                self.graph.number_of_edges,
-                self.graph.number_of_loops,
-                self.graph.number_of_leaves,
-                self.graph.number_of_nodes_with_degree_over_1000,
-                self.graph.max_degree,
-                self.graph.mean_degree,
-                self.graph.number_of_orphans,
-                self.graph.number_of_lone_pairs,
-                self.graph.max_strongly_connected_component_order,
-                self.graph.max_weakly_connected_component_order,
+                self._backend.number_of_nodes,
+                self._backend.number_of_edges,
+                self._backend.number_of_loops,
+                self._backend.number_of_leaves,
+                self._backend.number_of_nodes_with_degree_over_1000,
+                self._backend.max_degree,
+                self._backend.mean_degree,
+                self._backend.number_of_orphans,
+                self._backend.number_of_lone_pairs,
+                self._backend.max_strongly_connected_component_order,
+                self._backend.max_weakly_connected_component_order,
         ]
 
     def process(self) -> DataFrame:
@@ -41,3 +42,5 @@ class Gordium():
         analytics = DataFrame(analytics)
         return analytics
 
+    def get_graph(self) -> object:
+        return self._backend.get_graph()

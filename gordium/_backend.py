@@ -14,6 +14,10 @@ class GraphBackend(ABC):
         pass
 
     @abstractmethod
+    def get_graph(self) -> object:
+        pass
+
+    @abstractmethod
     def number_of_nodes(self):
         pass
 
@@ -72,4 +76,3 @@ class GraphBackend(ABC):
         wcch = self.wcc_histogram()
         order = wcch.sum()
         return 0 if order==0 else wcch.index.max()
-

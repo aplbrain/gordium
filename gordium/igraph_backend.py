@@ -1,6 +1,7 @@
 import igraph
+from pandas import DataFrame
 
-from ._backend import DataFrame, GraphBackend
+from ._backend import GraphBackend
 
 class IGraphBackend(GraphBackend):
 
@@ -17,6 +18,9 @@ class IGraphBackend(GraphBackend):
         self._dh = None
         self._scch = None
         self._wcch = None
+
+    def get_graph(self):
+        return self._graph
 
     def number_of_nodes(self):
         return self._graph.vcount()
