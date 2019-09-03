@@ -9,7 +9,7 @@ pip install .
 ```
 
 ## Data
-Gordium expects to receive a pandas DataFrame representing an edge list. It will handle two columns contain the ids of source nodes and target nodes respectively. By default, these column names are expected to be "source" and "target", but they can be specified by passing values for `src_label` and `tgt_label` to the Gordium constructor. At present, all edges are treated as directed, multiedges are ignored, edge attributes are ignored, and selfloops are permitted. A typical CSV representing the edgeframe of a directed 3-cycle is presented below.
+Gordium expects to receive a pandas DataFrame representing an edge list. It will handle two columns containing the ids of source nodes and target nodes respectively. By default, these column names are expected to be "source" and "target", but they can be specified by passing values for `src_label` and `tgt_label` to the Gordium constructor. At present, all edges are treated as directed, multiedges are ignored, edge attributes are ignored, and selfloops are permitted. A typical CSV representing the edgeframe of a directed 3-cycle is presented below.
 ```
 source,target
 0,1
