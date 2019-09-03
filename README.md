@@ -23,7 +23,10 @@ import pandas as pd
 from gordium import Gordium
 
 edgeframe = pd.read_csv('example.csv')
-g = Gordium(edgeframe)
+g = Gordium(
+        edgeframe,
+        src_label='MY_SOURCE',
+        tgt_label='MY_TARGET')
 analytics = g.process()
 ```
 
@@ -43,7 +46,11 @@ import pandas as pd
 from gordium import Gordium, IGraphBackend
 
 edgeframe = pd.read_csv('example.csv')
-g = Gordium(edgeframe, backend=IGraphBackend)
+g = Gordium(
+        edgeframe,
+        backend=IGraphBackend
+        src_label='MY_SOURCE',
+        tgt_label='MY_TARGET')
 analytics = g.process()
 ```
 
