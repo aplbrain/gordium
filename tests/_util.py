@@ -1,8 +1,8 @@
 from pandas import DataFrame
 
 def get_cc_edgeframe():
-    src_key = "presyn_segid"
-    tgt_key = "postsyn_segid"
+    src_key = "source"
+    tgt_key = "target"
     edges = [
             {src_key: 0, tgt_key: 1},
             {src_key: 1, tgt_key: 2},
@@ -15,8 +15,8 @@ def get_cc_edgeframe():
     return edgeframe
 
 def get_complete_edgeframe(n):
-    src_key = "presyn_segid"
-    tgt_key = "postsyn_segid"
+    src_key = "source"
+    tgt_key = "target"
     edges = list()
     for i in range(n):
         for j in range(i+1, n):

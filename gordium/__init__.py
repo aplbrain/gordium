@@ -12,8 +12,8 @@ class Gordium():
             self,
             edgeframe:DataFrame,
             backend:GraphBackend=NetworkXBackend,
-            src_label:str="presyn_segid",
-            tgt_label:str="postsyn_segid"):
+            src_label:str="source",
+            tgt_label:str="target"):
         self.graph = backend(
                 edgeframe,
                 src_label,
