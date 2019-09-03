@@ -5,7 +5,7 @@ A tool for untangling the mysteries of large-scale graphs.
 ```
 git clone https://github.com/aplbrain/gordium.git
 pip install -r requirements.txt
-pip install -e .
+pip install .
 ```
 
 ## Usage
