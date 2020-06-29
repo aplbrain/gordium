@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from pandas.testing import assert_frame_equal
 from gordium import Gordium, IGraphBackend
-from ._util import *
+from _util import *
 
 class TestIGraphBackend(TestCase):
 
@@ -52,3 +52,14 @@ class TestIGraphBackend(TestCase):
                 analytics_true,
                 check_dtype=False)
         return
+
+    def test_k_core_connected(self):
+        n  = 30
+        edgeframe = get_complete_edgeframe(n)
+        g = Gordium(edgeframe, backend=IGraphBackend)
+        self.assertEqual(g.k_core(2).vcount(), n)
+ 
+    def test_k_core_cc(self):
+        edgeframe = get_cc_edgeframe()
+        g = Gordium(edgeframe, backend=IGraphBackend)
+        self.assertEqual(g.k_core(2).vcount(), 5)

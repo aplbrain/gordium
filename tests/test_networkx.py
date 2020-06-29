@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from pandas.testing import assert_frame_equal
 from gordium import Gordium
-from ._util import *
+from _util import *
 
 class TestNetworkXBackend(TestCase):
 
@@ -52,3 +52,14 @@ class TestNetworkXBackend(TestCase):
                 analytics_true,
                 check_dtype=False)
         return
+
+    def test_k_core_connected(self):
+        n  = 30
+        edgeframe = get_complete_edgeframe(n)
+        g = Gordium(edgeframe)
+        self.assertEqual(len(g.k_core(2)), n)
+
+    def test_k_core_cc(self):
+        edgeframe = get_cc_edgeframe()
+        g = Gordium(edgeframe)
+        self.assertEqual(len(g.k_core(2)), 5)
