@@ -1,3 +1,4 @@
+from typing import Union, Iterable
 import igraph
 from pandas import DataFrame
 
@@ -30,6 +31,9 @@ class IGraphBackend(GraphBackend):
 
     def number_of_loops(self):
         return sum(self._graph.is_loop())
+    
+    def k_core(self, k: Union[int, Iterable[int]]):
+        return self._graph.k_core(k)
 
     def degree_histogram(self):
         if self._dh is None:

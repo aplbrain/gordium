@@ -1,3 +1,4 @@
+from typing import Union, Iterable
 import networkx as nx
 from pandas import DataFrame
 
@@ -30,6 +31,15 @@ class NetworkXBackend(GraphBackend):
 
     def number_of_loops(self):
         return len(list(nx.selfloop_edges(self._graph)))
+
+    def k_core(self, k: Union[int, Iterable[int]]):
+        if isinstance(k, int):
+            return nx.k_core(self._graph, k)
+        if isinstance(k, Iterable):
+            return [
+                nx.k_core(self._graph, k_num)
+                for k_num in k
+            ]
 
     def degree_histogram(self):
         if self._dh is None:
