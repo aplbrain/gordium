@@ -33,6 +33,10 @@ class GraphBackend(ABC):
     def degree_histogram(self):
         pass
 
+    @abstractmethod
+    def k_core(self, k: int):
+        pass
+
     def number_of_leaves(self):
         dh = self.degree_histogram()
         return dh.get(key=1, default=0)
