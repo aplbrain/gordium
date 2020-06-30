@@ -1,3 +1,4 @@
+from typing import Union, Iterable
 from abc import ABC, abstractmethod
 from collections import namedtuple
 
@@ -31,6 +32,23 @@ class GraphBackend(ABC):
 
     @abstractmethod
     def degree_histogram(self):
+        pass
+
+    @abstractmethod
+    def k_core(self, k: Union[int, Iterable[int]]):
+        """
+        Get the k-core graphs for all passed values of `k`.
+
+        If you pass an int, this will return a single graph core.
+        If you pass a list of ints, this will return a list of graph cores.
+
+        Arguments:
+            k (Union[int, Iterable[int]]): The core(s) to return
+        
+        Returns:
+            Union[Graph, Iterable[Graph]]: The k-core graphs
+        
+        """
         pass
 
     def number_of_leaves(self):
